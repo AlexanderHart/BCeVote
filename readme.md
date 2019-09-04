@@ -7,6 +7,9 @@ Moving forward, the next steps would be to incorporate the Algorand Python SDK a
 
 -Python3
 
+# Errors During Installation:
+-During initial installation, please be advised that it was required for me to ```sh $ pip install wheel``` in order to get all the dependencies to work properly.
+
 # Flask User Management
 
 [![Build Status](https://travis-ci.org/mjhea0/flask-basic-registration.svg?branch=master)](https://travis-ci.org/mjhea0/flask-basic-registration)
