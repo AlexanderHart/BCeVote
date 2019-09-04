@@ -5,10 +5,12 @@ Moving forward, the next steps would be to incorporate the Algorand Python SDK a
 # Dev Environment Specifications:
 -Ubuntu 18.04.03
 
+-VirtualBox v5.50.20
+
 -Python3
 
 # Errors During Installation:
--During initial installation, please be advised that it was required for me to ```sh $ pip install wheel``` in order to get all the dependencies to work properly.
+-During initial installation, please be advised that it was required for me to ```$ pip install wheel``` in order to get all the dependencies to work properly.
 
 # Flask User Management
 
