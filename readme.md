@@ -1,3 +1,11 @@
+# Blockchain eVote
+
+Moving forward, the next steps would be to incorporate the Algorand Python SDK and start implementing wallets and accounts.
+
+# Dev Environment Specifications:
+-Ubuntu 18.04.03
+-Python3
+
 # Flask User Management
 
 [![Build Status](https://travis-ci.org/mjhea0/flask-basic-registration.svg?branch=master)](https://travis-ci.org/mjhea0/flask-basic-registration)
