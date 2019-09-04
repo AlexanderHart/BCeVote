@@ -1,6 +1,16 @@
 # Blockchain eVote
 
-Moving forward, the next steps would be to incorporate the Algorand Python SDK and start implementing wallets and accounts for users and events.
+Moving forward, the next steps would be to incorporate the Algorand Python SDK and start implementing wallets and accounts for users and events. More specificially, I believe the following methods will be of use:
+
+-algosdk.kmd.createWallet(...)
+
+-algosdk.kmd.initWallet(...)
+
+-algosdk.generate(...)
+
+-algosdk.encode_address(...)
+
+-More to be added soon.
 
 # Dev Environment Specifications:
 -Ubuntu 18.04.03
