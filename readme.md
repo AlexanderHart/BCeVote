@@ -1,9 +1,10 @@
 # Blockchain eVote
 
-Moving forward, the next steps would be to incorporate the Algorand Python SDK and start implementing wallets and accounts.
+Moving forward, the next steps would be to incorporate the Algorand Python SDK and start implementing wallets and accounts for users and events.
 
 # Dev Environment Specifications:
 -Ubuntu 18.04.03
+
 -Python3
 
 # Flask User Management
