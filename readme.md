@@ -19,7 +19,10 @@ Moving forward, the next steps would be to incorporate the Algorand Python SDK a
 
 -VirtualBox v5.50.20
 
--Python3
+-Python3 
+
+# Credit & Acknowledgement:
+Credit and acknowledgement goes to GitHub user mjhea0, for his repo https://github.com/mjhea0/flask-basic-registration.git for which we used it for our user registration. 
 
 # Errors During Installation:
 -During initial installation, please be advised that it was required for me to ```$ pip install wheel``` in order to get all the dependencies to work properly.
