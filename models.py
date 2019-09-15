@@ -39,3 +39,21 @@ class User(db.Model):
 
     def __repr__(self):
         return '<email {}'.format(self.email)
+    
+    
+class Petition(db.Model):
+
+    __tablename__ = "petitions"
+
+    publicKey = db.Column(db.String, primary_key=True)
+    name = db.Column(db.String, nullable=False)
+    yesCount = db.Column(db.Integer)
+    startDate = db.Column(db.DateTime, nullable=True)
+    endDate = db.Column(db.DateTime, nullable=True)
+
+    def __init__(self, name, yesCount, startDate=None, endDate=None, publicKey="njcxc23rk3r32dsdxcse"):
+        self.name = name
+        self.yesCount = yesCount
+        self.startDate = startDate
+        self.endDate = endDate
+        self.publicKey = publicKey
