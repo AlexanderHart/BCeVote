@@ -5,6 +5,7 @@ import datetime
 
 from project import db, bcrypt
 
+
 class User(db.Model):
 
     __tablename__ = "users"
@@ -39,8 +40,7 @@ class User(db.Model):
 
     def __repr__(self):
         return '<email {}'.format(self.email)
-    
-    
+
 class Petition(db.Model):
 
     __tablename__ = "petitions"
@@ -51,9 +51,9 @@ class Petition(db.Model):
     startDate = db.Column(db.DateTime, nullable=True)
     endDate = db.Column(db.DateTime, nullable=True)
 
-    def __init__(self, name, yesCount, startDate=None, endDate=None, publicKey="njcxc23rk3r32dsdxcse"):
+    def __init__(self, name, publicKey, yesCount, startDate=None, endDate=None):
         self.name = name
+        self.publicKey = publicKey
         self.yesCount = yesCount
         self.startDate = startDate
         self.endDate = endDate
-        self.publicKey = publicKey
