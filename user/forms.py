@@ -38,6 +38,9 @@ class RegisterForm(Form):
             return False
         return True
 
+class CreatePetitionForm(Form):
+    name = TextField('name', validators=[DataRequired()])
+
 
 class ChangePasswordForm(Form):
     password = PasswordField(
