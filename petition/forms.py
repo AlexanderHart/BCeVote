@@ -41,6 +41,8 @@ class RegisterForm(Form):
 class CreatePetitionForm(Form):
     name = TextField('name', validators=[DataRequired()])
 
+class ListPetitionForm(Form):
+    foo = "foo"
 
 class ChangePasswordForm(Form):
     password = PasswordField(
