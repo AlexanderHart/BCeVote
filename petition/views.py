@@ -25,7 +25,7 @@ from flask.ext.login import login_user, logout_user, \
 from project.models import User, Petition
 # from project.email import send_email
 from project import db, bcrypt
-from .forms import LoginForm, RegisterForm, ChangePasswordForm, CreatePetitionForm
+from .forms import LoginForm, RegisterForm, ChangePasswordForm, CreatePetitionForm, ListPetitionForm
 
 import datetime
 
@@ -49,7 +49,7 @@ def createPetition():
     if form.validate_on_submit():
         # create kmd and algod clients
         kcl = kmd.KMDClient("43bdd18aee3788a8dd41d39a4d4c20c4e22539ec9c4faf0c3525cd30f0e2baae", "http://127.0.0.1:7833")
-        acl = algod.AlgodClient("44018d81c65b1b2fc4c33380cc9bb3cd0e6c33f8ede8bbee63638943f819b003", "http://127.0.0.1:36971")
+        acl = algod.AlgodClient("44018d81c65b1b2fc4c33380cc9bb3cd0e6c33f8ede8bbee63638943f819b003", "http://127.0.0.1:34533")
 
         wallet_name = "testWallet"
         wallet_pswd = "root"
@@ -92,5 +92,11 @@ def createPetition():
 @login_required
 @check_confirmed
 def listPetitions():
+    form = ListPetitionForm(request.form)
+    if form.validate_on_submit():
+        if request.method == 'POST':
+            flash(request.form['castVote'])
+            flash(current_user.email)
+
     myPetition = Petition.query.all()
-    return render_template('petition/listPetitions.html', myPetition=myPetition)
+    return render_template('petition/listPetitions.html', form=form, myPetition=myPetition)
