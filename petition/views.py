@@ -11,6 +11,8 @@ from algosdk import algod
 from algosdk import account
 from algosdk import mnemonic
 import json
+import base64
+from project import params
 
 
 from project.email import send_email
@@ -36,6 +38,8 @@ import datetime
 user_blueprint = Blueprint('user', __name__,)
 petition_blueprint = Blueprint('petition', __name__,)
 
+kcl = kmd.KMDClient(params.kmd_token, params.kmd_address)
+acl = algod.AlgodClient(params.algod_token, params.algod_address)
 
 ################
 #### routes ####
@@ -48,8 +52,6 @@ def createPetition():
     form = CreatePetitionForm(request.form)
     if form.validate_on_submit():
         # create kmd and algod clients
-        kcl = kmd.KMDClient("43bdd18aee3788a8dd41d39a4d4c20c4e22539ec9c4faf0c3525cd30f0e2baae", "http://127.0.0.1:7833")
-        acl = algod.AlgodClient("44018d81c65b1b2fc4c33380cc9bb3cd0e6c33f8ede8bbee63638943f819b003", "http://127.0.0.1:34533")
 
         wallet_name = "testWallet"
         wallet_pswd = "root"
@@ -88,6 +90,21 @@ def createPetition():
 
     return render_template('petition/createPetition.html', form=form)
 
+
+def DoubleVoteChecker(curUser, txArray):
+    for i in range(0,len(txArray)):
+        currentTx = txArray.get("transactions")[i]
+        # read noteb64 field of first transaction
+        noteb64 = currentTx.get("noteb64")
+        # Decode to bytes
+        note = base64.b64decode(noteb64)
+        note2 = str(note)[2:len(str(note))-1]
+        if note2 == str(curUser):
+            return True
+            break
+    return False
+
+
 @petition_blueprint.route('/listPetitions', methods=['GET', 'POST'])
 @login_required
 @check_confirmed
@@ -95,7 +112,23 @@ def listPetitions():
     form = ListPetitionForm(request.form)
     if form.validate_on_submit():
         if request.method == 'POST':
-            flash(request.form['castVote'])
+            # This would be a good place
+
+            petPK = str(request.form['castVote'])
+	    # to check if the current email has been used
+	    # for petition before.
+            txs = acl.transactions_by_address(petPK, first=3000, last=3100)
+            if DoubleVoteChecker(current_user.email, txs):
+                flash(str(current_user.email) + " has already signed this petition.")
+            else:
+                flash("This user is allowed to sign this peition.")
+
+	    # Given the petitionPK
+	    # check to see if any transactions exist,
+    	    # if they do, then check to see if any specific
+	    # transaction notefield has the current email hash.
+	    # Else: Successfully sign petition with email hash.
+            flash(petPK)
             flash(current_user.email)
 
     myPetition = Petition.query.all()
