@@ -51,9 +51,8 @@ acl = algod.AlgodClient(params.algod_token, params.algod_address)
 def createPetition():
     form = CreatePetitionForm(request.form)
     if form.validate_on_submit():
-        # create kmd and algod clients
 
-        wallet_name = "testWallet"
+        wallet_name = "Petitions"
         wallet_pswd = "root"
 
         # get the wallet ID
@@ -117,19 +116,79 @@ def listPetitions():
             petPK = str(request.form['castVote'])
 	    # to check if the current email has been used
 	    # for petition before.
-            txs = acl.transactions_by_address(petPK, first=3000, last=3100)
+            txs = acl.transactions_by_address(petPK, first=1000, last=1100)
             if DoubleVoteChecker(current_user.email, txs):
                 flash(str(current_user.email) + " has already signed this petition.")
             else:
                 flash("This user is allowed to sign this peition.")
+                # Send algo transaction from master account to petPK
+                existing_wallet_name = "MasterAccounts"
+                existing_wallet_pswd = "root"
+                existing_account = "N5EDLDXPWPAW4STCP24OOOLNSLSGXOI3RUUHXMDOTNMK252M3CH6CT7OJE"
+
+                # get the wallet ID
+                wallets = kcl.list_wallets()
+                existing_wallet_id = None
+                for w in wallets:
+                    if w["name"] == existing_wallet_name:
+                        existing_wallet_id = w["id"]
+                        break
+
+                # get a handle for the existing wallet
+                existing_handle = kcl.init_wallet_handle(existing_wallet_id,
+                                         existing_wallet_pswd)
+
+                # or enter wallet info here
+                wallet_name = "Petitions"
+                wallet_pswd = "root"
+
+                # check if the wallet already exists
+                wallet_id = None
+                for w in wallets:
+                    if w["name"] == wallet_name:
+                        wallet_id = w["id"]
+                        break
+
+                # if it doesn't exist, create the wallet and get its ID
+                if not wallet_id:
+                    wallet_id = kcl.create_wallet(wallet_name, wallet_pswd)["id"]
+
+                # get a handle for the wallet
+                handle = kcl.init_wallet_handle(wallet_id, wallet_pswd)
+
+
+
+                # get suggested parameters
+                params = acl.suggested_params()
+                gen = params["genesisID"]
+                gh = params["genesishashb64"]
+                last_round = params["lastRound"]
+                fee = params["fee"]
+                # create a transaction
+                note = str(current_user.email).encode()
+                amount = 100000
+                txn = transaction.PaymentTxn(existing_account, fee, last_round, last_round+100, gh, petPK, amount, gen=gen, note=note)              
+                # sign transaction with kmd
+                signed_with_kmd = kcl.sign_transaction(existing_handle,existing_wallet_pswd, txn)
+                # get the private key for the existing account
+                private_key = kcl.export_key(existing_handle, existing_wallet_pswd,existing_account)
+                # sign transaction offline
+                signed_offline = txn.sign(private_key)
+                # send the transaction
+                transaction_id = acl.send_transaction(signed_with_kmd)
+
+
+
+
+
+
+
 
 	    # Given the petitionPK
 	    # check to see if any transactions exist,
     	    # if they do, then check to see if any specific
 	    # transaction notefield has the current email hash.
 	    # Else: Successfully sign petition with email hash.
-            flash(petPK)
-            flash(current_user.email)
 
     myPetition = Petition.query.all()
     return render_template('petition/listPetitions.html', form=form, myPetition=myPetition)
