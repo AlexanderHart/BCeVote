@@ -45,8 +45,9 @@ class Petition(db.Model):
 
     __tablename__ = "petitions"
 
-    publicKey = db.Column(db.String, primary_key=True)
+    publicKey = db.Column(db.String)
     name = db.Column(db.String, nullable=False)
+    uid = db.Column(db.Integer, primary_key=True)
     yesCount = db.Column(db.Integer)
     startDate = db.Column(db.DateTime, nullable=True)
     endDate = db.Column(db.DateTime, nullable=True)
