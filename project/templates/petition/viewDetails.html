@@ -9,6 +9,10 @@
 	<td>Name: {{curPetition.name}}</td><br>
 	<td>ID #: {{curPetition.uid}}</td><br>
 	<td>Current # of votes #: {{curPetition.yesCount}}</td><br>
+
+	{% for tx in txList %}
+	<td>{{ tx }}</td><br>
+	{% endfor %}
 </tr>
 
 {% endblock %}
