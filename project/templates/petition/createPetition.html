@@ -8,7 +8,9 @@
 <form class="form-reset" role="form" method="post" action="">
   {{ form.csrf_token }}
   <p>
-    {{ form.name(placeholder="Name of petition") }}
+    {{ form.name(placeholder="Name of petition") }}<br><br>
+      {{ form.startDate(placeholder="Start Date e.g. 9/22/2019") }}<br><br>
+        {{ form.endDate(placeholder="End Date e.g. 9/22/2019") }}<br>
   </p>
 
   <button class="btn btn-success" type="submit">Submit</button>
