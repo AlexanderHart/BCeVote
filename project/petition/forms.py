@@ -2,7 +2,7 @@
 
 
 from flask_wtf import Form
-from wtforms import TextField, PasswordField
+from wtforms import TextField, PasswordField, DateField
 from wtforms.validators import DataRequired, Email, Length, EqualTo
 
 from project.models import User
@@ -40,6 +40,8 @@ class RegisterForm(Form):
 
 class CreatePetitionForm(Form):
     name = TextField('name', validators=[DataRequired()])
+    startDate = DateField('startDate', format="%m/%d/%Y")
+    endDate = DateField('endDate', format="%m/%d/%Y")
 
 class ListPetitionForm(Form):
     foo = "foo"
