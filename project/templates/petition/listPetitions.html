@@ -8,13 +8,13 @@
 <tr>
 	{% for p in myPetition %}
 	<td>{{p.name}}</td><br>
-	<td><a href="#">View more details</a></td><br>
 	<td>
 		<form class="form-reset" role="form" method="post" action="">
 			{{ form.csrf_token }}
 
-  			<button class="" name='castVote' value={{p.publicKey}} type="submit">Yes</button>
-  			<button class="" name='castVote2' value={{p.publicKey}} type="submit">No</button>
+  			<button class="" name='voteYes' value={{p.publicKey}} type="submit">Yes</button>
+  			<button class="" name='voteNo' value={{p.publicKey}} type="submit">No</button>
+			<button class="" name="details" value="{{p.uid}}" type="submit">View More Details</button>
 		</form>
 	</td><br><br>
 	{% endfor %}
