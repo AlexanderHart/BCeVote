@@ -46,15 +46,17 @@ class Petition(db.Model):
     __tablename__ = "petitions"
 
     publicKey = db.Column(db.String)
+    masterAccount = db.Column(db.String, nullable=False)
     name = db.Column(db.String, nullable=False)
     uid = db.Column(db.Integer, primary_key=True)
     yesCount = db.Column(db.Integer)
-    startDate = db.Column(db.DateTime, nullable=True)
-    endDate = db.Column(db.DateTime, nullable=True)
+    startDate = db.Column(db.Date, nullable=True)
+    endDate = db.Column(db.Date, nullable=True)
 
-    def __init__(self, name, publicKey, yesCount, startDate=None, endDate=None):
+    def __init__(self, name, publicKey, masterAccount, yesCount, startDate=None, endDate=None):
         self.name = name
         self.publicKey = publicKey
+        self.masterAccount = masterAccount
         self.yesCount = yesCount
         self.startDate = startDate
         self.endDate = endDate
