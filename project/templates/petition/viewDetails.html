@@ -1,0 +1,14 @@
+{% extends "_base.html" %}
+
+{% block content %}
+
+<h1>Current Petition:</h1>
+<br>
+
+<tr>
+	<td>Name: {{curPetition.name}}</td><br>
+	<td>ID #: {{curPetition.uid}}</td><br>
+	<td>Current # of votes #: {{curPetition.yesCount}}</td><br>
+</tr>
+
+{% endblock %}
