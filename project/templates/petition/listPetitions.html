@@ -6,7 +6,7 @@
 <br>
 
 <tr>
-	{% for p in myPetition %}
+	{% for p in curPetitions %}
 	<td>{{p.name}}</td><br>
 	<td>
 		<form class="form-reset" role="form" method="post" action="">
@@ -19,5 +19,27 @@
 	</td><br><br>
 	{% endfor %}
 </tr>
+
+
+
+
+<h1>Past Petition:</h1>
+<br>
+
+<tr>
+	{% for p in pastPetitions %}
+	<td>{{p.name}}</td><br>
+	<td>
+		<form class="form-reset" role="form" method="post" action="">
+			{{ form.csrf_token }}
+
+			<button class="" name="details" value="{{p.uid}}" type="submit">View More Details</button>
+		</form>
+	</td><br><br>
+	{% endfor %}
+</tr>
+
+
+
 
 {% endblock %}
