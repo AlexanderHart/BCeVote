@@ -2,17 +2,78 @@
 
 {% block content %}
 
-<h1>Current Petition:</h1>
+<h1 class="">{{curPetition.name}}</h1>
+<h2 class="">Petition ID #{{curPetition.uid}}</h2>
+
+<br>
+<head>
+<style>
+table {
+	text-align:center;
+}
+th {
+	text-align:center;
+	background-color:rgba(61,92,153,0.9);
+	color:white;
+	padding-top:10px;
+	padding-bottom:10px;
+	padding-right:50px;
+	padding-left:50px;
+	font-size:17px;
+}
+
+td {
+	text-align:center;
+	background-color:rgba(116,146,212,0.3);
+	color:black;
+	font-size:17px;
+	padding-top:10px;
+	padding-bottom:10px;
+	padding-right:50px;
+	padding-left:50px;
+}
+</style>
+</head>
+<body>
+
+<table class="" style="width:;">
+  <tr>
+    <th style="text-align:right;">Current # of YES votes: {{curPetition.yesCount}}</th>
+		<th></th>
+  </tr>
+	  <tr>
+	    <th>Encrypted Voter ID</th>
+	    <th>Time Stamp</th>
+	  </tr>
+
+	{% for key in txList %}
+  <tr>
+    <td>{{key}}</td>
+    <td>{{txList[key]}}</td>
+  </tr>
+	{% endfor %}
+</table>
+
+<br>
 <br>
 
-<tr>
-	<td>Name: {{curPetition.name}}</td><br>
-	<td>ID #: {{curPetition.uid}}</td><br>
-	<td>Current # of votes #: {{curPetition.yesCount}}</td><br>
+<table class="" style="width:;">
+  <tr>
+    <th style="background-color: rgba(153,61,77,0.9); text-align:right;">Current # of No votes: {{curPetition.yesCount}}</th>
+		<th style="background-color: rgba(153,61,77,0.9);"></th>
+  </tr>
+	  <tr>
+	    <th style="background-color: rgba(153,61,77,0.9);">Encrypted Voter ID</th>
+	    <th style="background-color: rgba(153,61,77,0.9);">Time Stamp</th>
+	  </tr>
 
-	{% for tx in txList %}
-	<td>{{ tx }}</td><br>
+	{% for key in txList %}
+  <tr>
+    <td style="background-color: rgba(212,116,131,0.3);"></td>
+    <td style="background-color: rgba(212,116,131,0.3);"></td>
+  </tr>
 	{% endfor %}
-</tr>
+</table>
+
 
 {% endblock %}
