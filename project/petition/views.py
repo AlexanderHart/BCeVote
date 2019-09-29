@@ -131,6 +131,8 @@ def DoubleVoteChecker(curUser, txArray):
         # Decode to bytes
         note = base64.b64decode(noteb64)
         print(note)
+        print("Note type: " + str(type(note)))
+        print(type(json.loads(note)))
         email = json.loads(note)["email"]
         if email == str(curUser):
             return True
@@ -139,9 +141,16 @@ def DoubleVoteChecker(curUser, txArray):
 
 
 def GetTxListElements(txList):
-    list = []
-    for tx in txList:
-        list.append(base64.b64decode(tx['noteb64']))
+    list = {}
+    for i in range(0, len(txList)):
+        test = base64.b64decode(txList[i]['noteb64'])
+        jsonTest = json.loads(test)
+        email = jsonTest["email"]
+        timeStamp = jsonTest["timeStamp"]
+        
+        list.update( {str(email) : str(timeStamp)} )
+        print("test::")
+        print(list)
 
     return list
 
@@ -156,7 +165,31 @@ def listPetitions():
             if "details" in request.form:
                 curPetition = Petition.query.filter_by(uid=str(request.form["details"])).first()
                 txs = acl.transactions_by_address(curPetition.publicKey, first=10399, last=acl.block_info(acl.status().get("lastRound"))["round"])
-                return render_template('petition/viewDetails.html', txList=GetTxListElements(txs.get("transactions")), curPetition=curPetition)
+                print("test")
+                print("test")
+                my_json = (GetTxListElements(txs.get("transactions")))
+                print("HODL")
+                #print(type((GetTxListElements(txs.get("transactions"))[0]).decode()))
+                #print(GetTxListElements(txs.get("transactions"))[0])
+                #print(str(type(GetTxListElements(txs.get("transactions"))[0].decode('utf8'))))
+                #print(str(type(GetTxListElements(txs.get("transactions"))[0])))
+                #print("Json:")
+                #print(my_json)
+
+                testJson='{"history":{"tx":[{"email":"1","timeStamp":"1321"},{"email":"2","timeStamp":"132333331"}]}}'
+
+                my_list = {"alex@gmail.com":"4141312413", "jon@gmail.com":"4141312413"}
+                #my_json_string = json.dumps(my_list)
+                print("values")
+                #print(my_json_string)
+                #print(my_json_string)
+                #data = json.loads(testJson)
+                #s = json.dumps(data, indent=4, sort_keys=True)
+                print("MESSAGE")
+                #print(data["history"])
+                #print(s)
+
+                return render_template('petition/viewDetails.html', txList=my_json, curPetition=curPetition)
             elif "voteYes" in request.form:
                 petPK = str(request.form['voteYes'])
                 petitionMasterAccount = (Petition.query.filter_by(publicKey=petPK).one())
