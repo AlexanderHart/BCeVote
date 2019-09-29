@@ -6,12 +6,11 @@
 
 </style>
 
-<div class="col-xs-4 col-xs-offset-4" style="width: 30%; background-color:red;">
 
-<h1 style="text-align:center;">Please login</h1>
+<h1 class="col-xs-6 col-xs-offset-4" style="text-align:;">Login</h1>
 <br>
 
-<form style="padding-left:18%;" class="form-login" role="form" method="post" action="">
+<form style="padding-left:;" class="col-xs-4 col-xs-offset-4 form-login" role="form" method="post" action="">
   {{ form.csrf_token }}
 
   <p>
@@ -38,10 +37,10 @@
     </span>
   </p>
 
-  <button class="btn btn-success" type="submit">Sign in!</button>
-  <br><br>
+  <button style="text-align: center;  color:white; font-weight:500; background-image: linear-gradient(#4365a8, #304978); border-radius:29px; font-size:19px; padding-top: 15px; padding-left: 73px;padding-right: 73px; padding-bottom: 15px; margin-top:15px;" class="btn btn-success" type="submit">Submit</button>
+  <br><br><br>
 
-  <p>Need to <a href="/register">Register</a>?</p>
+  <p>Need to <a style="color:#3C5A99" href="/register">sign up</a>?</p>
 
 </form>
 </div>
