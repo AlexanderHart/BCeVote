@@ -1,4 +1,5 @@
 # Blockchain eVote
+<img width="496" alt="screenshot" src="https://user-images.githubusercontent.com/10848641/65827844-8a82a180-e262-11e9-9bcc-98cd4eafcf1c.png">
 
 # Dev Environment Specifications:
 -Ubuntu 18.04.03
