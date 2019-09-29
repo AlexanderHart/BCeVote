@@ -1,9 +1,12 @@
 # Brooklyn College eVote
 <img width="496" alt="screenshot" src="https://user-images.githubusercontent.com/10848641/65827844-8a82a180-e262-11e9-9bcc-98cd4eafcf1c.png">
+(Fig.) Default index page.
 
 <img width="498" alt="createPetition" src="https://user-images.githubusercontent.com/10848641/65838085-4a0c3d80-e2cd-11e9-99a1-af29eab94e2f.png">
+(Fig.) Creat petition page.
 
 <img width="843" alt="votes" src="https://user-images.githubusercontent.com/10848641/65838013-44622800-e2cc-11e9-8bf1-8672a7e5aa41.png">
+(Fig.) View more details page.
 
 
 # Dev Environment Specifications:
