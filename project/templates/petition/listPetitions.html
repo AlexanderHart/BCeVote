@@ -2,19 +2,19 @@
 
 {% block content %}
 
-<h1>Current Petition:</h1>
+<p style="font-size:20px;">Current Petitions:</p>
 <br>
 
 <tr>
 	{% for p in curPetitions %}
-	<td>{{p.name}}</td><br>
+	<td><p style="font-size:35px;">{{p.name}}</p></td><br>
 	<td>
 		<form class="form-reset" role="form" method="post" action="">
 			{{ form.csrf_token }}
 
-  			<button class="" name='voteYes' value={{p.publicKey}} type="submit">Yes</button>
-  			<button class="" name='voteNo' value={{p.publicKey}} type="submit">No</button>
-			<button class="" name="details" value="{{p.uid}}" type="submit">View More Details</button>
+  			<button style="text-align: center;  color:white; font-weight:500; background-image: linear-gradient(#43a886, #30785f); border-radius:29px; font-size:14px; padding-top: 15px; padding-left: 35px;padding-right: 35px; padding-bottom: 15px; margin-top:0px;" class="" name='voteYes' value={{p.publicKey}} type="submit">Yes</button>
+  			<button style="text-align: center;  color:white; font-weight:500; background-image: linear-gradient(#a84354, #78303c); border-radius:29px; font-size:14px; padding-top: 15px; padding-left: 35px;padding-right: 35px; padding-bottom: 15px; margin-top:0px;" class="" name='voteNo' value={{p.publicKey}} type="submit">No</button>
+			<button style="text-align: center;  color:white; font-weight:500; background-image: linear-gradient(#4365a8, #304978); border-radius:29px; font-size:14px; padding-top: 15px; padding-left: 35px;padding-right: 35px; padding-bottom: 15px;margin-top:0px;" class="" name="details" value="{{p.uid}}" type="submit">View More Details</button>
 		</form>
 	</td><br><br>
 	{% endfor %}
@@ -23,17 +23,17 @@
 
 
 
-<h1>Past Petition:</h1>
+<p style="font-size:20px;">Past Petition:</p>
 <br>
 
 <tr>
 	{% for p in pastPetitions %}
-	<td>{{p.name}}</td><br>
+  <td><p style="font-size:35px;">{{p.name}}</p></td>
 	<td>
 		<form class="form-reset" role="form" method="post" action="">
 			{{ form.csrf_token }}
 
-			<button class="" name="details" value="{{p.uid}}" type="submit">View More Details</button>
+			<button style="text-align: center;  color:white; font-weight:500; background-image: linear-gradient(#4365a8, #304978); border-radius:29px; font-size:14px; padding-top: 15px; padding-left: 35px;padding-right: 35px; padding-bottom: 15px;margin-top:9px;" class="" name="details" value="{{p.uid}}" type="submit">View More Details</button>
 		</form>
 	</td><br><br>
 	{% endfor %}
