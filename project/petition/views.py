@@ -1,4 +1,4 @@
-# project/user/views.py
+# project/petition/views.py
 
 
 #################
@@ -120,37 +120,64 @@ def createPetition():
 
     return render_template('petition/createPetition.html', form=form)
 
-
+##################################################
+#
+# Return type:
+# (Boolean)
+#
+# Parameters:
+# (String) - Current user's email.
+# (Dict)   - Collection of transactions for the
+#            specified Algorand account address.
+#
+# Description:
+# Iterate through Dict and parse JSON data to
+# check if String matches itself in Dict; return
+# True if such; otherwise return False to indicate
+# no match was found and the user has not voted for
+# a particular petition yet.
+#
+##################################################
 def DoubleVoteChecker(curUser, txArray):
     txSize = txArray.get("transactions")
 
+    if txSize is None:
+        return False
+
     for i in range(0,len(txSize)):
         currentTx = txArray.get("transactions")[i]
-        # read noteb64 field of first transaction
         noteb64 = currentTx.get("noteb64")
-        # Decode to bytes
         note = base64.b64decode(noteb64)
-        print(note)
-        print("Note type: " + str(type(note)))
-        print(type(json.loads(note)))
         email = json.loads(note)["email"]
         if email == str(curUser):
             return True
             break
+
     return False
 
 
+##################################################
+#
+# Return type:
+# (render_template)
+#
+# Description:
+# Conditionally take action based on which form
+# button the user clicks.
+#
+##################################################
 def GetTxListElements(txList):
     list = {}
+
+    if txList is None:
+        return {"No data available":"No data available"}
+
     for i in range(0, len(txList)):
-        test = base64.b64decode(txList[i]['noteb64'])
-        jsonTest = json.loads(test)
-        email = jsonTest["email"]
-        timeStamp = jsonTest["timeStamp"]
-        
+        jsonStr = base64.b64decode(txList[i]['noteb64'])
+        realJson = json.loads(jsonStr)
+        email = realJson["email"]
+        timeStamp = realJson["timeStamp"]
         list.update( {str(email) : str(timeStamp)} )
-        print("test::")
-        print(list)
 
     return list
 
@@ -163,41 +190,21 @@ def listPetitions():
     if form.validate_on_submit():
         if request.method == 'POST':
             if "details" in request.form:
+
                 curPetition = Petition.query.filter_by(uid=str(request.form["details"])).first()
                 txs = acl.transactions_by_address(curPetition.publicKey, first=10399, last=acl.block_info(acl.status().get("lastRound"))["round"])
-                print("test")
-                print("test")
                 my_json = (GetTxListElements(txs.get("transactions")))
-                print("HODL")
-                #print(type((GetTxListElements(txs.get("transactions"))[0]).decode()))
-                #print(GetTxListElements(txs.get("transactions"))[0])
-                #print(str(type(GetTxListElements(txs.get("transactions"))[0].decode('utf8'))))
-                #print(str(type(GetTxListElements(txs.get("transactions"))[0])))
-                #print("Json:")
-                #print(my_json)
-
-                testJson='{"history":{"tx":[{"email":"1","timeStamp":"1321"},{"email":"2","timeStamp":"132333331"}]}}'
-
-                my_list = {"alex@gmail.com":"4141312413", "jon@gmail.com":"4141312413"}
-                #my_json_string = json.dumps(my_list)
-                print("values")
-                #print(my_json_string)
-                #print(my_json_string)
-                #data = json.loads(testJson)
-                #s = json.dumps(data, indent=4, sort_keys=True)
-                print("MESSAGE")
-                #print(data["history"])
-                #print(s)
 
                 return render_template('petition/viewDetails.html', txList=my_json, curPetition=curPetition)
             elif "voteYes" in request.form:
+
                 petPK = str(request.form['voteYes'])
                 petitionMasterAccount = (Petition.query.filter_by(publicKey=petPK).one())
                 txs = acl.transactions_by_address(petPK, first=10399, last=acl.block_info(acl.status().get("lastRound"))["round"])
 
-                ## Error checking for when no votes has been casted yet.
-                if txs.get("transactions") is None:
-                    print("No votes has been casted yet.")
+                if DoubleVoteChecker(current_user.email, txs):
+                    flash("You have already signed this petition.")
+                else:
                     masterAccountWallet = "MasterAccounts"
                     masterAccountPassword = "root"
                     masterAccount = petitionMasterAccount.masterAccount
@@ -239,51 +246,6 @@ def listPetitions():
                     signed_offline = txn.sign(private_key)
                     transaction_id = acl.send_transaction(signed_with_kmd)
                     print(transaction_id)
-                else:
-                    if DoubleVoteChecker(current_user.email, txs):
-                        flash(str(current_user.email) + " has already signed this petition.")
-                    else:
-                        masterAccountWallet = "MasterAccounts"
-                        masterAccountPassword = "root"
-                        masterAccount = petitionMasterAccount.masterAccount
-
-                        wallets = kcl.list_wallets()
-                        masterAccountID = None
-                        for w in wallets:
-                            if w["name"] == masterAccountWallet:
-                                masterAccountID = w["id"]
-                                break
-
-                        masterAccountHandle = kcl.init_wallet_handle(masterAccountID,masterAccountPassword)
-
-                        petitionWallet = "Petitions"
-                        petitionWalletPassword = "root"
-
-                        petitionWalletID = None
-                        for w in wallets:
-                            if w["name"] == petitionWallet:
-                                petitionWalletID = w["id"]
-                                break
-
-                        if not petitionWalletID:
-                            petitionWalletID = kcl.create_wallet(petitionWallet, petitionWalletPassword)["id"]
-
-                        handle = kcl.init_wallet_handle(petitionWalletID, petitionWalletPassword)
-                        params = acl.suggested_params()
-                        gen = params["genesisID"]
-                        gh = params["genesishashb64"]
-                        last_round = params["lastRound"]
-                        fee = params["fee"]
-                    #jsonInput = '{"email": "' + str(hashlib.sha256(current_user.email.encode()).hexdigest()) + '", "timeStamp": "34123213124.32412"}'
-                        jsonInput = '{"email": "' + str(current_user.email) + '", "timeStamp": "' + str(time.time()) + '"}'
-                        note = (jsonInput).encode()
-                        amount = 103000
-                        txn = transaction.PaymentTxn(masterAccount, fee, last_round, last_round+100, gh, petPK, amount, gen=gen, note=note)
-                        signed_with_kmd = kcl.sign_transaction(masterAccountHandle,masterAccountPassword, txn)
-                        private_key = kcl.export_key(masterAccountHandle, masterAccountPassword,masterAccount)
-                        signed_offline = txn.sign(private_key)
-                        transaction_id = acl.send_transaction(signed_with_kmd)
-                        print(transaction_id)
 
     curDate = datetime.datetime.now().strftime("%Y-%m-%d")
     curPetitions = Petition.query.filter(Petition.endDate >= curDate)
