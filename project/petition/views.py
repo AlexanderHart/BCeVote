@@ -4,6 +4,8 @@
 #################
 #### imports ####
 #################
+
+
 from algosdk import encoding
 from algosdk import transaction
 from algosdk import kmd
@@ -193,9 +195,16 @@ def listPetitions():
 
                 curPetition = Petition.query.filter_by(uid=str(request.form["details"])).first()
                 txs = acl.transactions_by_address(curPetition.publicKey, first=10399, last=acl.block_info(acl.status().get("lastRound"))["round"])
+
                 my_json = (GetTxListElements(txs.get("transactions")))
 
-                return render_template('petition/viewDetails.html', txList=my_json, curPetition=curPetition)
+
+                trashBagPK = (Petition.query.filter_by(uid=1).one()).masterAccount
+                txs2 = acl.transactions_by_address(trashBagPK, first=10399, last=acl.block_info(acl.status().get("lastRound"))["round"])
+
+                my_json2 = (GetTxListElements(txs2.get("transactions")))
+
+                return render_template('petition/viewDetails.html', txList=my_json, NotxList=my_json2, curPetition=curPetition)
             elif "voteYes" in request.form:
 
                 petPK = str(request.form['voteYes'])
@@ -236,16 +245,69 @@ def listPetitions():
                     gh = params["genesishashb64"]
                     last_round = params["lastRound"]
                     fee = params["fee"]
+                    print("This transaction fee is " + str(fee))
                 #jsonInput = '{"email": "' + str(hashlib.sha256(current_user.email.encode()).hexdigest()) + '", "timeStamp": "34123213124.32412"}'
                     jsonInput = '{"email": "' + str(current_user.email) + '", "timeStamp": "' + str(time.time()) + '"}'
                     note = (jsonInput).encode()
-                    amount = 103000
+                    amount = 100000
                     txn = transaction.PaymentTxn(masterAccount, fee, last_round, last_round+100, gh, petPK, amount, gen=gen, note=note)
                     signed_with_kmd = kcl.sign_transaction(masterAccountHandle,masterAccountPassword, txn)
                     private_key = kcl.export_key(masterAccountHandle, masterAccountPassword,masterAccount)
                     signed_offline = txn.sign(private_key)
                     transaction_id = acl.send_transaction(signed_with_kmd)
                     print(transaction_id)
+            elif "voteNo" in request.form:
+                trashBagPK = (Petition.query.filter_by(uid=1).one()).masterAccount
+                petPK = str(request.form['voteNo'])
+                petitionMasterAccount = (Petition.query.filter_by(publicKey=petPK).one())
+                txs = acl.transactions_by_address(trashBagPK, first=10399, last=acl.block_info(acl.status().get("lastRound"))["round"])
+
+                if DoubleVoteChecker(current_user.email, txs):
+                    flash("You have already signed this petition.")
+                else:
+                    masterAccountWallet = "MasterAccounts"
+                    masterAccountPassword = "root"
+                    masterAccount = petitionMasterAccount.masterAccount
+
+                    wallets = kcl.list_wallets()
+                    masterAccountID = None
+                    for w in wallets:
+                        if w["name"] == masterAccountWallet:
+                            masterAccountID = w["id"]
+                            break
+
+                    masterAccountHandle = kcl.init_wallet_handle(masterAccountID,masterAccountPassword)
+
+                    petitionWallet = "Petitions"
+                    petitionWalletPassword = "root"
+
+                    petitionWalletID = None
+                    for w in wallets:
+                        if w["name"] == petitionWallet:
+                            petitionWalletID = w["id"]
+                            break
+
+                    if not petitionWalletID:
+                        petitionWalletID = kcl.create_wallet(petitionWallet, petitionWalletPassword)["id"]
+
+                    handle = kcl.init_wallet_handle(petitionWalletID, petitionWalletPassword)
+                    params = acl.suggested_params()
+                    gen = params["genesisID"]
+                    gh = params["genesishashb64"]
+                    last_round = params["lastRound"]
+                    fee = params["fee"]
+                    print("This transaction fee is " + str(fee))
+                #jsonInput = '{"email": "' + str(hashlib.sha256(current_user.email.encode()).hexdigest()) + '", "timeStamp": "34123213124.32412"}'
+                    jsonInput = '{"email": "' + str(current_user.email) + '", "timeStamp": "' + str(time.time()) + '"}'
+                    note = (jsonInput).encode()
+                    amount = 100000
+                    txn = transaction.PaymentTxn(masterAccount, fee, last_round, last_round+100, gh, trashBagPK, amount, gen=gen, note=note)
+                    signed_with_kmd = kcl.sign_transaction(masterAccountHandle,masterAccountPassword, txn)
+                    private_key = kcl.export_key(masterAccountHandle, masterAccountPassword,masterAccount)
+                    signed_offline = txn.sign(private_key)
+                    transaction_id = acl.send_transaction(signed_with_kmd)
+                    print(transaction_id)
+
 
     curDate = datetime.datetime.now().strftime("%Y-%m-%d")
     curPetitions = Petition.query.filter(Petition.endDate >= curDate)
