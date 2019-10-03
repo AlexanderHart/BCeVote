@@ -15,6 +15,7 @@ from algosdk import mnemonic
 import json
 import base64
 import hashlib
+import subprocess
 
 
 from project.email import send_email
@@ -118,6 +119,11 @@ def createPetition():
         db.session.add(petition)
         db.session.commit()
 
+        # Run bash script that automatically transfers microAlgos
+        # from unencrypted-default-wallet to the desired Peition's
+        # Master Account.
+        subprocess.call(["project/autoDispense.sh",str(address_2)])
+
         flash('Petition has been created!.', 'success')
 
     return render_template('petition/createPetition.html', form=form)
@@ -211,7 +217,7 @@ def listPetitions():
 
                 petPK = str(request.form['voteYes'])
                 petitionMasterAccount = (Petition.query.filter_by(publicKey=petPK).one())
-                txs = acl.transactions_by_address(petPK, first=10399, last=acl.block_info(acl.status().get("lastRound"))["round"])
+                txs = acl.transactions_by_address(petPK, first=1, last=acl.block_info(acl.status().get("lastRound"))["round"])
 
                 if DoubleVoteChecker(current_user.email, txs):
                     flash("You have already signed this petition.")
@@ -257,12 +263,15 @@ def listPetitions():
                     private_key = kcl.export_key(masterAccountHandle, masterAccountPassword,masterAccount)
                     signed_offline = txn.sign(private_key)
                     transaction_id = acl.send_transaction(signed_with_kmd)
-                    print(transaction_id)
+                    if acl.send_transaction(signed_with_kmd):
+                        flash("Thank you for voting! Please wait a few seconds before viewing more details.")
+                    else:
+                        flash("Error you can not vote twice.")
             elif "voteNo" in request.form:
                 trashBagPK = (Petition.query.filter_by(uid=1).one()).masterAccount
                 petPK = str(request.form['voteNo'])
                 petitionMasterAccount = (Petition.query.filter_by(publicKey=petPK).one())
-                txs = acl.transactions_by_address(trashBagPK, first=10399, last=acl.block_info(acl.status().get("lastRound"))["round"])
+                txs = acl.transactions_by_address(trashBagPK, first=1, last=acl.block_info(acl.status().get("lastRound"))["round"])
 
                 if DoubleVoteChecker(current_user.email, txs):
                     flash("You have already signed this petition.")
@@ -307,8 +316,8 @@ def listPetitions():
                     signed_with_kmd = kcl.sign_transaction(masterAccountHandle,masterAccountPassword, txn)
                     private_key = kcl.export_key(masterAccountHandle, masterAccountPassword,masterAccount)
                     signed_offline = txn.sign(private_key)
-                    transaction_id = acl.send_transaction(signed_with_kmd)
-                    print(transaction_id)
+                    if acl.send_transaction(signed_with_kmd):
+                        flash("Thank you for voting! Please wait a few seconds before viewing more details.")
 
 
     curDate = datetime.datetime.now().strftime("%Y-%m-%d")
