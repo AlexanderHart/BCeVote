@@ -85,11 +85,13 @@ def create_admin():
 
 @manager.command
 def create_trashbag():
-    kcl = kmd.KMDClient("780954d4d6d9a6e052d92f4b6c91c5f8f044514cabe1c697b3904270c784fd75", "http://127.0.0.1:7833")
-    acl = algod.AlgodClient("4a327d8ae7faa2d890ff05d95bae2a167b7bdff2e58630dd4afff1f693856d90", "http://127.0.0.1:8080")
+    kcl = kmd.KMDClient("eea0f318393807f76c471f89d5f28501dfc4468ab606c13703ab457ac92efa6e", "http://127.0.0.1:7833")
+    acl = algod.AlgodClient("38f0005e0ec826c5dff9b03c1f08e0c133a4360bd6b886b9827226a1780bd86e", "http://127.0.0.1:8080")
 
     petitionWallet = "Petitions"
     petitionWalletPassword = "root"
+
+
 
     # get the wallet ID
     wallets = kcl.list_wallets()
@@ -99,6 +101,10 @@ def create_trashbag():
         if w["name"] == petitionWallet:
             petitionWalletID = w["id"]
             break
+
+    # if it doesn't exist, create the wallet and get its ID
+    if not petitionWalletID:
+        petitionWalletID = kcl.create_wallet(petitionWallet, petitionWalletPassword)["id"]
 
     # get a handle for the wallet
     handle = kcl.init_wallet_handle(petitionWalletID, petitionWalletPassword)
