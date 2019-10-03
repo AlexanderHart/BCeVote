@@ -67,10 +67,10 @@ td {
 	    <th style="background-color: rgba(153,61,77,0.9);">Time Stamp</th>
 	  </tr>
 
-	{% for key in txList %}
+	{% for key in NotxList %}
   <tr>
-    <td style="background-color: rgba(212,116,131,0.3);"></td>
-    <td style="background-color: rgba(212,116,131,0.3);"></td>
+    <td style="background-color: rgba(212,116,131,0.3);">{{key}}</td>
+    <td style="background-color: rgba(212,116,131,0.3);">{{NotxList[key]}}</td>
   </tr>
 	{% endfor %}
 </table>
