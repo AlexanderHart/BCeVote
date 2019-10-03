@@ -254,8 +254,15 @@ def listPetitions():
                     last_round = params["lastRound"]
                     fee = params["fee"]
                     print("This transaction fee is " + str(fee))
-                #jsonInput = '{"email": "' + str(hashlib.sha256(current_user.email.encode()).hexdigest()) + '", "timeStamp": "34123213124.32412"}'
-                    jsonInput = '{"email": "' + str(current_user.email) + '", "timeStamp": "' + str(time.time()) + '", "petitionPK": "' + str(petPK) + '"}'
+
+                    # datetime object containing current date and time
+                    now = datetime.datetime.now()
+
+                    # dd/mm/YY H:M:S
+                    dt_string = now.strftime("%m/%d/%Y %H:%M:%S")
+                    print("now = " + dt_string)
+                    #jsonInput = '{"email": "' + str(hashlib.sha256(current_user.email.encode()).hexdigest()) + '", "timeStamp": "34123213124.32412"}'
+                    jsonInput = '{"email": "' + str(current_user.email) + '", "timeStamp": "' + str(dt_string) + '", "petitionPK": "' + str(petPK) + '"}'
                     note = (jsonInput).encode()
                     amount = 100000
                     txn = transaction.PaymentTxn(masterAccount, fee, last_round, last_round+100, gh, petPK, amount, gen=gen, note=note)
@@ -263,10 +270,8 @@ def listPetitions():
                     private_key = kcl.export_key(masterAccountHandle, masterAccountPassword,masterAccount)
                     signed_offline = txn.sign(private_key)
                     transaction_id = acl.send_transaction(signed_with_kmd)
-                    if acl.send_transaction(signed_with_kmd):
-                        flash("Thank you for voting! Please wait a few seconds before viewing more details.")
-                    else:
-                        flash("Error you can not vote twice.")
+                    acl.send_transaction(signed_with_kmd)
+
             elif "voteNo" in request.form:
                 trashBagPK = (Petition.query.filter_by(uid=1).one()).masterAccount
                 petPK = str(request.form['voteNo'])
@@ -308,16 +313,21 @@ def listPetitions():
                     last_round = params["lastRound"]
                     fee = params["fee"]
                     print("This transaction fee is " + str(fee))
+                    now = datetime.datetime.now()
+
+                    # dd/mm/YY H:M:S
+                    dt_string = now.strftime("%m/%d/%Y %H:%M:%S")
+                    print("now = " + dt_string)
+
                 #jsonInput = '{"email": "' + str(hashlib.sha256(current_user.email.encode()).hexdigest()) + '", "timeStamp": "34123213124.32412"}'
-                    jsonInput = '{"email": "' + str(current_user.email) + '", "timeStamp": "' + str(time.time()) + '", "petitionPK": "' + str(petPK) + '"}'
+                    jsonInput = '{"email": "' + str(current_user.email) + '", "timeStamp": "' + str(dt_string) + '", "petitionPK": "' + str(petPK) + '"}'
                     note = (jsonInput).encode()
                     amount = 100000
                     txn = transaction.PaymentTxn(masterAccount, fee, last_round, last_round+100, gh, trashBagPK, amount, gen=gen, note=note)
                     signed_with_kmd = kcl.sign_transaction(masterAccountHandle,masterAccountPassword, txn)
                     private_key = kcl.export_key(masterAccountHandle, masterAccountPassword,masterAccount)
                     signed_offline = txn.sign(private_key)
-                    if acl.send_transaction(signed_with_kmd):
-                        flash("Thank you for voting! Please wait a few seconds before viewing more details.")
+                    acl.send_transaction(signed_with_kmd)
 
 
     curDate = datetime.datetime.now().strftime("%Y-%m-%d")
