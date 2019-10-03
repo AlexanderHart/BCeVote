@@ -41,8 +41,8 @@ import time
 user_blueprint = Blueprint('user', __name__,)
 petition_blueprint = Blueprint('petition', __name__,)
 
-kcl = kmd.KMDClient("780954d4d6d9a6e052d92f4b6c91c5f8f044514cabe1c697b3904270c784fd75", "http://127.0.0.1:7833")
-acl = algod.AlgodClient("4a327d8ae7faa2d890ff05d95bae2a167b7bdff2e58630dd4afff1f693856d90", "http://127.0.0.1:8080")
+kcl = kmd.KMDClient("eea0f318393807f76c471f89d5f28501dfc4468ab606c13703ab457ac92efa6e", "http://127.0.0.1:7833")
+acl = algod.AlgodClient("38f0005e0ec826c5dff9b03c1f08e0c133a4360bd6b886b9827226a1780bd86e", "http://127.0.0.1:8080")
 
 ################
 #### routes ####
@@ -168,7 +168,7 @@ def DoubleVoteChecker(curUser, txArray):
 # button the user clicks.
 #
 ##################################################
-def GetTxListElements(txList):
+def GetTxListElements(txList, intendedPK):
     list = {}
 
     if txList is None:
@@ -179,7 +179,9 @@ def GetTxListElements(txList):
         realJson = json.loads(jsonStr)
         email = realJson["email"]
         timeStamp = realJson["timeStamp"]
-        list.update( {str(email) : str(timeStamp)} )
+        petitionPK = realJson["petitionPK"]
+        if petitionPK == intendedPK:
+            list.update( {str(email) : str(timeStamp)} )
 
     return list
 
@@ -194,15 +196,15 @@ def listPetitions():
             if "details" in request.form:
 
                 curPetition = Petition.query.filter_by(uid=str(request.form["details"])).first()
-                txs = acl.transactions_by_address(curPetition.publicKey, first=10399, last=acl.block_info(acl.status().get("lastRound"))["round"])
+                txs = acl.transactions_by_address(curPetition.publicKey, first=1, last=acl.block_info(acl.status().get("lastRound"))["round"])
 
-                my_json = (GetTxListElements(txs.get("transactions")))
+                my_json = (GetTxListElements(txs.get("transactions"),curPetition.publicKey))
 
 
                 trashBagPK = (Petition.query.filter_by(uid=1).one()).masterAccount
-                txs2 = acl.transactions_by_address(trashBagPK, first=10399, last=acl.block_info(acl.status().get("lastRound"))["round"])
+                txs2 = acl.transactions_by_address(trashBagPK, first=1, last=acl.block_info(acl.status().get("lastRound"))["round"])
 
-                my_json2 = (GetTxListElements(txs2.get("transactions")))
+                my_json2 = (GetTxListElements(txs2.get("transactions"),curPetition.publicKey))
 
                 return render_template('petition/viewDetails.html', txList=my_json, NotxList=my_json2, curPetition=curPetition)
             elif "voteYes" in request.form:
@@ -247,7 +249,7 @@ def listPetitions():
                     fee = params["fee"]
                     print("This transaction fee is " + str(fee))
                 #jsonInput = '{"email": "' + str(hashlib.sha256(current_user.email.encode()).hexdigest()) + '", "timeStamp": "34123213124.32412"}'
-                    jsonInput = '{"email": "' + str(current_user.email) + '", "timeStamp": "' + str(time.time()) + '"}'
+                    jsonInput = '{"email": "' + str(current_user.email) + '", "timeStamp": "' + str(time.time()) + '", "petitionPK": "' + str(petPK) + '"}'
                     note = (jsonInput).encode()
                     amount = 100000
                     txn = transaction.PaymentTxn(masterAccount, fee, last_round, last_round+100, gh, petPK, amount, gen=gen, note=note)
@@ -298,7 +300,7 @@ def listPetitions():
                     fee = params["fee"]
                     print("This transaction fee is " + str(fee))
                 #jsonInput = '{"email": "' + str(hashlib.sha256(current_user.email.encode()).hexdigest()) + '", "timeStamp": "34123213124.32412"}'
-                    jsonInput = '{"email": "' + str(current_user.email) + '", "timeStamp": "' + str(time.time()) + '"}'
+                    jsonInput = '{"email": "' + str(current_user.email) + '", "timeStamp": "' + str(time.time()) + '", "petitionPK": "' + str(petPK) + '"}'
                     note = (jsonInput).encode()
                     amount = 100000
                     txn = transaction.PaymentTxn(masterAccount, fee, last_round, last_round+100, gh, trashBagPK, amount, gen=gen, note=note)
