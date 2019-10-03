@@ -6,11 +6,19 @@ import unittest
 import coverage
 import datetime
 
+
+from algosdk import encoding
+from algosdk import transaction
+from algosdk import kmd
+from algosdk import algod
+from algosdk import account
+from algosdk import mnemonic
+
 from flask.ext.script import Manager
 from flask.ext.migrate import Migrate, MigrateCommand
 
 from project import app, db
-from project.models import User
+from project.models import User, Petition
 
 
 app.config.from_object(os.environ['APP_SETTINGS'])
@@ -73,6 +81,40 @@ def create_admin():
         confirmed=True,
         confirmed_on=datetime.datetime.now())
     )
+    db.session.commit()
+
+@manager.command
+def create_trashbag():
+    kcl = kmd.KMDClient("780954d4d6d9a6e052d92f4b6c91c5f8f044514cabe1c697b3904270c784fd75", "http://127.0.0.1:7833")
+    acl = algod.AlgodClient("4a327d8ae7faa2d890ff05d95bae2a167b7bdff2e58630dd4afff1f693856d90", "http://127.0.0.1:8080")
+
+    petitionWallet = "Petitions"
+    petitionWalletPassword = "root"
+
+    # get the wallet ID
+    wallets = kcl.list_wallets()
+
+    petitionWalletID = None
+    for w in wallets:
+        if w["name"] == petitionWallet:
+            petitionWalletID = w["id"]
+            break
+
+    # get a handle for the wallet
+    handle = kcl.init_wallet_handle(petitionWalletID, petitionWalletPassword)
+    # generate account with account and check if it's valid
+    private_key_1, address_1 = account.generate_account()
+    # import generated account into the wallet
+    kcl.import_key(handle, private_key_1)
+
+    """Creates trash bag account for all petitions."""
+    petition = Petition(
+        name="Trash Bag Account",
+    publicKey=address_1,
+    masterAccount = address_1,
+        yesCount=0
+    )
+    db.session.add(petition)
     db.session.commit()
 
 
