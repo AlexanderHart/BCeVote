@@ -19,59 +19,22 @@
 # Credit & Acknowledgement:
 Credit and acknowledgement goes to GitHub user mjhea0, for his repo https://github.com/mjhea0/flask-basic-registration.git for which we used it for our user registration. 
 
-# Errors During Installation:
--During initial installation, please be advised that it was required for me to ```$ pip install wheel``` in order to get all the dependencies to work properly.
 
-# Flask User Management
+### How to install and setup locally:
 
-[![Build Status](https://travis-ci.org/mjhea0/flask-basic-registration.svg?branch=master)](https://travis-ci.org/mjhea0/flask-basic-registration)
-
-Starter app for managing users - login/logout and registration.
-
-## QuickStart
-
-### Set Environment Variables
-
-```sh
-$ export APP_SETTINGS="project.config.DevelopmentConfig"
-```
-
-or
-
-```sh
-$ export APP_SETTINGS="project.config.ProductionConfig"
-```
-
-### Update Settings in Production
-
-1. `SECRET_KEY`
-1. `SQLALCHEMY_DATABASE_URI`
-
-### Create DB
-
-```sh
+1. Create empty parent directory.
+2. `python3 -m venv venv`
+3. Clone repo into venv directory.
+4. `source venv/bin/activate`
+5. `pip3 -r install requirements.txt`
+6. `pip3 install py-algorand-sdk`
+7. Set environment variables, APP_MAIL_USERNAME and APP_MAIL_PASSWORD to your email and password, respectfully.
+8. ```sh
 $ python manage.py create_db
 $ python manage.py db init
 $ python manage.py db migrate
 $ python manage.py create_admin
-```
-
-### Run
-
-```sh
+$ python manage.py create_trashbag
 $ python manage.py runserver
 ```
 
-### Testing
-
-Without coverage:
-
-```sh
-$ python manage.py test
-```
-
-With coverage:
-
-```sh
-$ python manage.py cov
-```
