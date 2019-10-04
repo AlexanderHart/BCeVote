@@ -13,7 +13,7 @@
 
 -VirtualBox v5.50.20
 
--Python3 
+-Python3.6.8.
 
 ### How to install and setup locally:
 1. Create empty parent directory.
@@ -24,11 +24,11 @@
 6. `$ pip3 install py-algorand-sdk`
 7. Set environment variables, APP_MAIL_USERNAME and APP_MAIL_PASSWORD to your email and password, respectfully.
 8. `$ python manage.py create_db`
-`$ python manage.py db init`
-`$ python manage.py db migrate`
-`$ python manage.py create_admin`
-`$ python manage.py create_trashbag`
-`$ python manage.py runserver`
+9. `$ python manage.py db init`
+10. `$ python manage.py db migrate`
+11. `$ python manage.py create_admin`
+12. `$ python manage.py create_trashbag`
+13. `$ python manage.py runserver`
 
 # Credit & Acknowledgement:
 Credit and acknowledgement goes to GitHub user mjhea0, for his repo https://github.com/mjhea0/flask-basic-registration.git for which we used it for our user registration. 
