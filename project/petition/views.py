@@ -1,54 +1,53 @@
 # project/petition/views.py
 
-
-#################
-#### imports ####
-#################
-
-
-from algosdk import encoding
+from .forms import LoginForm, RegisterForm, ChangePasswordForm, CreatePetitionForm, ListPetitionForm
+from project.token import generate_confirmation_token, confirm_token
+from project.decorators import check_confirmed
+from project.models import User, Petition
+from project.email import send_email
+from project import db, bcrypt
 from algosdk import transaction
-from algosdk import kmd
-from algosdk import algod
-from algosdk import account
 from algosdk import mnemonic
+from algosdk import encoding
+from algosdk import account
+from algosdk import algod
+from algosdk import kmd
+import subprocess
+import datetime
+import hashlib
 import json
 import base64
-import hashlib
-import subprocess
-
-
-from project.email import send_email
-from project.decorators import check_confirmed
-from project.token import generate_confirmation_token, confirm_token
+import time
 
 from flask import render_template, Blueprint, url_for, \
     redirect, flash, request
 from flask.ext.login import login_user, logout_user, \
     login_required, current_user
 
-from project.models import User, Petition
-# from project.email import send_email
-from project import db, bcrypt
-from .forms import LoginForm, RegisterForm, ChangePasswordForm, CreatePetitionForm, ListPetitionForm
 
-import datetime
-import time
 
-################
-#### config ####
-################
+user_blueprint      = Blueprint('user', __name__,)
+petition_blueprint  = Blueprint('petition', __name__,)
 
-user_blueprint = Blueprint('user', __name__,)
-petition_blueprint = Blueprint('petition', __name__,)
+kcl = kmd.KMDClient("92a6ba4b14f7525168df6c51187a74bfd811f33cb483aa5c055d9921d8a90aa9", "http://127.0.0.1:53052")
+acl = algod.AlgodClient("25fbdb645361edd5093b180f882a40504040f64fc47de1eea1e1b19da141c38e", "http://127.0.0.1:53030")
 
-kcl = kmd.KMDClient("eea0f318393807f76c471f89d5f28501dfc4468ab606c13703ab457ac92efa6e", "http://127.0.0.1:7833")
-acl = algod.AlgodClient("38f0005e0ec826c5dff9b03c1f08e0c133a4360bd6b886b9827226a1780bd86e", "http://127.0.0.1:8080")
 
-################
-#### routes ####
-################
-
+##################################################
+#                                                #
+# Return type:                                   #
+# (render_template)                              #
+#                                                #
+# Parameters:                                    #
+# None                                           #
+#                                                #
+# Description:                                   #
+# Create petition and respective master account  #
+# with error checking. Additionally, add the     #
+# account(s) details to SQL database. Finally,   #
+# execute bash script to populate master account.#
+#                                                #
+##################################################
 @petition_blueprint.route('/createPetition', methods=['GET', 'POST'])
 @login_required
 @check_confirmed
@@ -56,23 +55,17 @@ def createPetition():
     form = CreatePetitionForm(request.form)
     if form.validate_on_submit():
 
-        petitionWallet = "Petitions"
-        petitionWalletPassword = "root"
-
-        masterAccountWallet = "MasterAccounts"
+        petitionWallet              = "Petitions"
+        petitionWalletPassword      = "root"
+        masterAccountWallet         = "MasterAccounts"
         masterAccountWalletPassword = "root"
-
-
-        # get the wallet ID
-        wallets = kcl.list_wallets()
-
-        petitionWalletID = None
+        wallets                     = kcl.list_wallets()
+        petitionWalletID            = None
         for w in wallets:
     	    if w["name"] == petitionWallet:
                 petitionWalletID = w["id"]
                 break
-
-        masterAccountWalletID = None
+        masterAccountWalletID       = None
         for w2 in wallets:
     	    if w2["name"] == masterAccountWallet:
                 masterAccountWalletID = w2["id"]
@@ -82,36 +75,26 @@ def createPetition():
         if not petitionWalletID:
             petitionWalletID = kcl.create_wallet(petitionWallet, petitionWalletPassword)["id"]
 
-
         # get a handle for the wallet
         handle = kcl.init_wallet_handle(petitionWalletID, petitionWalletPassword)
-
         #### MASTER ACCOUNTS
         # if it doesn't exist, create the wallet and get its ID
         if not masterAccountWalletID:
             masterAccountWalletID = kcl.create_wallet(masterAccountWallet, masterAccountWalletPassword)["id"]
-
         # get a handle for the wallet
         handle2 = kcl.init_wallet_handle(masterAccountWalletID, masterAccountWalletPassword)
-
-
-
         # generate account with account and check if it's valid
         private_key_1, address_1 = account.generate_account()
-
         # generate master account with account and check if it's valid
         private_key_2, address_2 = account.generate_account()
-
-
-
         # import generated account into the wallet
         kcl.import_key(handle, private_key_1)
         kcl.import_key(handle2, private_key_2)
 
         petition = Petition(
             name=form.name.data,
-	    publicKey=address_1,
-        masterAccount = address_2,
+	        publicKey=address_1,
+            masterAccount = address_2,
             yesCount=0,
             startDate=form.startDate.data,
             endDate=form.endDate.data
@@ -128,24 +111,25 @@ def createPetition():
 
     return render_template('petition/createPetition.html', form=form)
 
-##################################################
-#
-# Return type:
-# (Boolean)
-#
-# Parameters:
-# (String) - Current user's email.
-# (Dict)   - Collection of transactions for the
-#            specified Algorand account address.
-#
-# Description:
-# Iterate through Dict and parse JSON data to
-# check if String matches itself in Dict; return
-# True if such; otherwise return False to indicate
-# no match was found and the user has not voted for
-# a particular petition yet.
-#
-##################################################
+
+#####################################################
+#                                                   #
+# Return type:                                      #
+# (Boolean)                                         #
+#                                                   #
+# Parameters:                                       #
+# (String) - Current user's email.                  #
+# (Dict)   - Collection of transactions for the     #
+#            specified Algorand account address.    #
+#                                                   #
+# Description:                                      #
+# Iterate through Dict and parse JSON data to       #
+# check if String matches itself in Dict; return    #
+# True if such; otherwise return False to indicate  #
+# no match was found and the user has not voted for #
+# a particular petition yet.                        #
+#                                                   #
+#####################################################
 def DoubleVoteChecker(curUser, txArray):
     txSize = txArray.get("transactions")
 
@@ -165,14 +149,19 @@ def DoubleVoteChecker(curUser, txArray):
 
 
 ##################################################
-#
-# Return type:
-# (render_template)
-#
-# Description:
-# Conditionally take action based on which form
-# button the user clicks.
-#
+#                                                #
+# Return type:                                   #
+# (Dict)                                         #
+#                                                #
+# Parameters:                                    #
+# (List) Algorand account transactions.          #
+# (String) Account public key to check for.      #
+#                                                #
+# Description:                                   #
+# Return Dict of transactions for specific       #
+# account with multiple layers of checking       #
+# throughout the process.                        #
+#                                                #
 ##################################################
 def GetTxListElements(txList, intendedPK):
     list = {}
@@ -181,17 +170,40 @@ def GetTxListElements(txList, intendedPK):
         return {"No data available":"No data available"}
 
     for i in range(0, len(txList)):
-        jsonStr = base64.b64decode(txList[i]['noteb64'])
-        realJson = json.loads(jsonStr)
-        email = realJson["email"]
-        timeStamp = realJson["timeStamp"]
-        petitionPK = realJson["petitionPK"]
+        jsonStr     = base64.b64decode(txList[i]['noteb64'])
+        realJson    = json.loads(jsonStr)
+        email       = realJson["email"]
+        timeStamp   = realJson["timeStamp"]
+        petitionPK  = realJson["petitionPK"]
+
         if petitionPK == intendedPK:
             list.update( {str(email) : str(timeStamp)} )
 
     return list
 
 
+####################################################
+#                                                  #
+# Return type:                                     #
+# (render_template)                                #
+#                                                  #
+# Parameters:                                      #
+# None                                             #
+#                                                  #
+# Description:                                     #
+# If 'view details' button is clicked, then        #
+# first get current petition public key and use    #
+# it to parse all the yes votes for account.       #
+# Next, get trash bag public key and parse all     #
+# appropiate no votes for specific petition        #
+# account. Finally, pass that parsed data to HTML. #
+#                                                  #
+# If button clicked for yes, or no vote; then      #
+# then get required account public key(s) and do   #
+# error checking to make sure current user is      #
+# eligable to vote.                                #
+#                                                  #
+####################################################
 @petition_blueprint.route('/listPetitions', methods=['GET', 'POST'])
 @login_required
 @check_confirmed
@@ -200,45 +212,34 @@ def listPetitions():
     if form.validate_on_submit():
         if request.method == 'POST':
             if "details" in request.form:
-
                 curPetition = Petition.query.filter_by(uid=str(request.form["details"])).first()
-                txs = acl.transactions_by_address(curPetition.publicKey, first=1, last=acl.block_info(acl.status().get("lastRound"))["round"])
+                yes_votes   = acl.transactions_by_address(curPetition.publicKey, first=1, last=acl.block_info(acl.status().get("lastRound"))["round"])
+                yes_json    = (GetTxListElements(yes_votes.get("transactions"),curPetition.publicKey))
+                trashBagPK  = (Petition.query.filter_by(uid=1).one()).masterAccount
+                no_txs      = acl.transactions_by_address(trashBagPK, first=1, last=acl.block_info(acl.status().get("lastRound"))["round"])
+                no_json     = (GetTxListElements(no_txs.get("transactions"),curPetition.publicKey))
+                return render_template('petition/viewDetails.html', txList=yes_json, NotxList=no_json, curPetition=curPetition)
 
-                my_json = (GetTxListElements(txs.get("transactions"),curPetition.publicKey))
-
-
-                trashBagPK = (Petition.query.filter_by(uid=1).one()).masterAccount
-                txs2 = acl.transactions_by_address(trashBagPK, first=1, last=acl.block_info(acl.status().get("lastRound"))["round"])
-
-                my_json2 = (GetTxListElements(txs2.get("transactions"),curPetition.publicKey))
-
-                return render_template('petition/viewDetails.html', txList=my_json, NotxList=my_json2, curPetition=curPetition)
             elif "voteYes" in request.form:
-
-                petPK = str(request.form['voteYes'])
-                petitionMasterAccount = (Petition.query.filter_by(publicKey=petPK).one())
-                txs = acl.transactions_by_address(petPK, first=1, last=acl.block_info(acl.status().get("lastRound"))["round"])
-
+                petPK                   = str(request.form['voteYes'])
+                petitionMasterAccount   = (Petition.query.filter_by(publicKey=petPK).one())
+                txs                     = acl.transactions_by_address(petPK, first=1, last=acl.block_info(acl.status().get("lastRound"))["round"])
                 if DoubleVoteChecker(current_user.email, txs):
                     flash("You have already signed this petition.")
                 else:
-                    masterAccountWallet = "MasterAccounts"
-                    masterAccountPassword = "root"
-                    masterAccount = petitionMasterAccount.masterAccount
-
-                    wallets = kcl.list_wallets()
-                    masterAccountID = None
+                    masterAccountWallet     = "MasterAccounts"
+                    masterAccountPassword   = "root"
+                    masterAccount           = petitionMasterAccount.masterAccount
+                    wallets                 = kcl.list_wallets()
+                    masterAccountID         = None
                     for w in wallets:
                         if w["name"] == masterAccountWallet:
                             masterAccountID = w["id"]
                             break
-
-                    masterAccountHandle = kcl.init_wallet_handle(masterAccountID,masterAccountPassword)
-
-                    petitionWallet = "Petitions"
-                    petitionWalletPassword = "root"
-
-                    petitionWalletID = None
+                    masterAccountHandle     = kcl.init_wallet_handle(masterAccountID,masterAccountPassword)
+                    petitionWallet          = "Petitions"
+                    petitionWalletPassword  = "root"
+                    petitionWalletID        = None
                     for w in wallets:
                         if w["name"] == petitionWallet:
                             petitionWalletID = w["id"]
@@ -247,90 +248,70 @@ def listPetitions():
                     if not petitionWalletID:
                         petitionWalletID = kcl.create_wallet(petitionWallet, petitionWalletPassword)["id"]
 
-                    handle = kcl.init_wallet_handle(petitionWalletID, petitionWalletPassword)
-                    params = acl.suggested_params()
-                    gen = params["genesisID"]
-                    gh = params["genesishashb64"]
-                    last_round = params["lastRound"]
-                    fee = params["fee"]
-                    print("This transaction fee is " + str(fee))
-
-                    # datetime object containing current date and time
-                    now = datetime.datetime.now()
-
-                    # dd/mm/YY H:M:S
-                    dt_string = now.strftime("%m/%d/%Y %H:%M:%S")
-                    print("now = " + dt_string)
-                    #jsonInput = '{"email": "' + str(hashlib.sha256(current_user.email.encode()).hexdigest()) + '", "timeStamp": "34123213124.32412"}'
-                    jsonInput = '{"email": "' + str(current_user.email) + '", "timeStamp": "' + str(dt_string) + '", "petitionPK": "' + str(petPK) + '"}'
-                    note = (jsonInput).encode()
-                    amount = 100000
-                    txn = transaction.PaymentTxn(masterAccount, fee, last_round, last_round+100, gh, petPK, amount, gen=gen, note=note)
+                    handle          = kcl.init_wallet_handle(petitionWalletID, petitionWalletPassword)
+                    params          = acl.suggested_params()
+                    gen             = params["genesisID"]
+                    gh              = params["genesishashb64"]
+                    last_round      = params["lastRound"]
+                    fee             = params["fee"]
+                    now             = datetime.datetime.now()
+                    dt_string       = now.strftime("%m/%d/%Y %H:%M:%S")
+                    #encrypt email like such: str(hashlib.sha256(current_user.email.encode()).hexdigest())
+                    jsonInput       = '{"email": "' + str(current_user.email) + '", "timeStamp": "' + str(dt_string) + '", "petitionPK": "' + str(petPK) + '"}'
+                    note            = (jsonInput).encode()
+                    amount          = 100000
+                    txn             = transaction.PaymentTxn(masterAccount, fee, last_round, last_round+100, gh, petPK, amount, gen=gen, note=note)
                     signed_with_kmd = kcl.sign_transaction(masterAccountHandle,masterAccountPassword, txn)
-                    private_key = kcl.export_key(masterAccountHandle, masterAccountPassword,masterAccount)
-                    signed_offline = txn.sign(private_key)
-                    transaction_id = acl.send_transaction(signed_with_kmd)
-                    acl.send_transaction(signed_with_kmd)
-
+                    private_key     = kcl.export_key(masterAccountHandle, masterAccountPassword,masterAccount)
+                    signed_offline  = txn.sign(private_key)
+                    transaction_id  = acl.send_transaction(signed_with_kmd)
             elif "voteNo" in request.form:
-                trashBagPK = (Petition.query.filter_by(uid=1).one()).masterAccount
-                petPK = str(request.form['voteNo'])
-                petitionMasterAccount = (Petition.query.filter_by(publicKey=petPK).one())
-                txs = acl.transactions_by_address(trashBagPK, first=1, last=acl.block_info(acl.status().get("lastRound"))["round"])
-
+                trashBagPK              = (Petition.query.filter_by(uid=1).one()).masterAccount
+                petPK                   = str(request.form['voteNo'])
+                petitionMasterAccount   = (Petition.query.filter_by(publicKey=petPK).one())
+                txs                     = acl.transactions_by_address(trashBagPK, first=1, last=acl.block_info(acl.status().get("lastRound"))["round"])
                 if DoubleVoteChecker(current_user.email, txs):
                     flash("You have already signed this petition.")
                 else:
-                    masterAccountWallet = "MasterAccounts"
-                    masterAccountPassword = "root"
-                    masterAccount = petitionMasterAccount.masterAccount
-
-                    wallets = kcl.list_wallets()
-                    masterAccountID = None
+                    masterAccountWallet     = "MasterAccounts"
+                    masterAccountPassword   = "root"
+                    masterAccount           = petitionMasterAccount.masterAccount
+                    wallets                 = kcl.list_wallets()
+                    masterAccountID         = None
                     for w in wallets:
                         if w["name"] == masterAccountWallet:
                             masterAccountID = w["id"]
                             break
-
-                    masterAccountHandle = kcl.init_wallet_handle(masterAccountID,masterAccountPassword)
-
-                    petitionWallet = "Petitions"
-                    petitionWalletPassword = "root"
-
-                    petitionWalletID = None
+                    masterAccountHandle     = kcl.init_wallet_handle(masterAccountID,masterAccountPassword)
+                    petitionWallet          = "Petitions"
+                    petitionWalletPassword  = "root"
+                    petitionWalletID        = None
                     for w in wallets:
                         if w["name"] == petitionWallet:
                             petitionWalletID = w["id"]
                             break
-
                     if not petitionWalletID:
                         petitionWalletID = kcl.create_wallet(petitionWallet, petitionWalletPassword)["id"]
 
-                    handle = kcl.init_wallet_handle(petitionWalletID, petitionWalletPassword)
-                    params = acl.suggested_params()
-                    gen = params["genesisID"]
-                    gh = params["genesishashb64"]
-                    last_round = params["lastRound"]
-                    fee = params["fee"]
-                    print("This transaction fee is " + str(fee))
-                    now = datetime.datetime.now()
-
-                    # dd/mm/YY H:M:S
-                    dt_string = now.strftime("%m/%d/%Y %H:%M:%S")
-                    print("now = " + dt_string)
-
-                #jsonInput = '{"email": "' + str(hashlib.sha256(current_user.email.encode()).hexdigest()) + '", "timeStamp": "34123213124.32412"}'
-                    jsonInput = '{"email": "' + str(current_user.email) + '", "timeStamp": "' + str(dt_string) + '", "petitionPK": "' + str(petPK) + '"}'
-                    note = (jsonInput).encode()
-                    amount = 100000
-                    txn = transaction.PaymentTxn(masterAccount, fee, last_round, last_round+100, gh, trashBagPK, amount, gen=gen, note=note)
+                    handle          = kcl.init_wallet_handle(petitionWalletID, petitionWalletPassword)
+                    params          = acl.suggested_params()
+                    gen             = params["genesisID"]
+                    gh              = params["genesishashb64"]
+                    last_round      = params["lastRound"]
+                    fee             = params["fee"]
+                    now             = datetime.datetime.now()
+                    dt_string       = now.strftime("%m/%d/%Y %H:%M:%S")
+                    #str(hashlib.sha256(current_user.email.encode()).hexdigest())
+                    jsonInput       = '{"email": "' + str(current_user.email) + '", "timeStamp": "' + str(dt_string) + '", "petitionPK": "' + str(petPK) + '"}'
+                    note            = (jsonInput).encode()
+                    amount          = 100000
+                    txn             = transaction.PaymentTxn(masterAccount, fee, last_round, last_round+100, gh, trashBagPK, amount, gen=gen, note=note)
                     signed_with_kmd = kcl.sign_transaction(masterAccountHandle,masterAccountPassword, txn)
-                    private_key = kcl.export_key(masterAccountHandle, masterAccountPassword,masterAccount)
-                    signed_offline = txn.sign(private_key)
-                    acl.send_transaction(signed_with_kmd)
+                    private_key     = kcl.export_key(masterAccountHandle, masterAccountPassword,masterAccount)
+                    signed_offline  = txn.sign(private_key)
+                    transaction_id  = acl.send_transaction(signed_with_kmd)
 
-
-    curDate = datetime.datetime.now().strftime("%Y-%m-%d")
-    curPetitions = Petition.query.filter(Petition.endDate >= curDate)
-    pastPetitions = Petition.query.filter(Petition.endDate < curDate)
+    curDate         = datetime.datetime.now().strftime("%Y-%m-%d")
+    curPetitions    = Petition.query.filter(Petition.endDate >= curDate)
+    pastPetitions   = Petition.query.filter(Petition.endDate < curDate)
     return render_template('petition/listPetitions.html', form=form, pastPetitions=pastPetitions, curPetitions=curPetitions)
