@@ -15,7 +15,11 @@
 
 -Python3.6.8.
 
-### How to install and setup locally:
+### Local Setup/Installation Process:
+### Part One - Install Algorand Node:
+1. Click on this link and follow instructions for your specific operating system: https://developer.algorand.org/docs/introduction-installing-node
+
+### Part Two - Install BCeV:
 1. Create empty parent directory.
 2. `$ python3 -m venv venv`
 3. Clone repo into venv directory.
@@ -23,12 +27,22 @@
 5. `$ pip3 -r install requirements.txt`
 6. `$ pip3 install py-algorand-sdk`
 7. Set environment variables, APP_MAIL_USERNAME and APP_MAIL_PASSWORD to your email and password, respectfully.
-8. `$ python manage.py create_db`
-9. `$ python manage.py db init`
-10. `$ python manage.py db migrate`
-11. `$ python manage.py create_admin`
-12. `$ python manage.py create_trashbag`
-13. `$ python manage.py runserver`
+
+### Part Three - Create and run Private Network/Algod Processes & Update Config:
+1. Create a private network with `./goal network create -r ~/algodNet -n private -t <path_to_template.json>`
+NOTICE: We supply the template JSON file (from the Algorand developer page) that can be used in the above step. Locate the file at the following path: <YourParentDirectory>/venv/BCeV-master/project/privateNetwork.json
+2. `./goal network start -r ~/algodNet`
+3. `./goal kmd start -d ~/algodNet/Primary`
+4. Using the API keys in files: algod.net algod.token kmd.net kmd.token in ~/algodNet/Primary and ~/algodNet/Primary/kmd, respectfully, then open config.py located at <YourParentDirectory/venv/BCeV-master/project/config.py and update the API credentials where neccesary. 
+
+### Part Four - Run setup processes for Flask
+1. `$ python manage.py create_db`
+2. `$ python manage.py db init`
+3. `$ python manage.py db migrate`
+4. `$ python manage.py create_admin`
+5. `$ python manage.py create_trashbag`
+6. `$ python manage.py runserver`
+7. Navigate to 127.0.0.1:5000 to demo BCeV.
 
 # Credit & Acknowledgement:
 Credit and acknowledgement goes to GitHub user mjhea0, for his repo https://github.com/mjhea0/flask-basic-registration.git for which we used it for our user registration. 
