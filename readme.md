@@ -9,11 +9,11 @@
 (Fig.) View more details page.
 
 # Dev Environment Specifications:
--Ubuntu 18.04.03
+-Tested on Mac OS X 10.14
 
--VirtualBox v5.50.20
+-Tested on Ubuntu 18.04.03 with VirtualBox v5.50.20
 
--Python3.6.8.
+-Written in Python3.6.8.
 
 ### Local Setup/Installation Process:
 ### Part One - Install Algorand Node:
@@ -21,19 +21,19 @@
 
 ### Part Two - Install BCeV:
 1. Create empty parent directory.
-2. `$ python3 -m venv venv`
+2. Create Python virtual environment `$ python3 -m venv venv`
 3. Clone repo into venv directory.
-4. `$ source venv/bin/activate`
+4. Activate virtual environment`$ source venv/bin/activate`
 5. `$ pip3 -r install requirements.txt`
 6. `$ pip3 install py-algorand-sdk`
-7. Set environment variables, APP_MAIL_USERNAME and APP_MAIL_PASSWORD to your email and password, respectfully.
+7. Set environment variables, APP_MAIL_USERNAME and APP_MAIL_PASSWORD to your email and password, respectfully. Also, these values can be hardcoded in /project/config.py, if desired.
 
 ### Part Three - Create and run Private Network/Algod Processes & Update Config:
 1. Create a private network with `./goal network create -r ~/algodNet -n private -t <path_to_template.json>`
 NOTICE: We supply the template JSON file (from the Algorand developer page) that can be used in the above step. Locate the file at the following path: <YourParentDirectory>/venv/BCeV-master/project/privateNetwork.json
 2. `./goal network start -r ~/algodNet`
 3. `./goal kmd start -d ~/algodNet/Primary`
-4. Using the API keys in files: algod.net algod.token kmd.net kmd.token in ~/algodNet/Primary and ~/algodNet/Primary/kmd, respectfully, then open config.py located at <YourParentDirectory/venv/BCeV-master/project/config.py and update the API credentials where neccesary. 
+4. Using the API keys in files: algod.net algod.token kmd.net kmd.token in ~/algodNet/Primary and ~/algodNet/Primary/kmd, respectfully, then open config.py located at <YourParentDirectory>/venv/BCeV-master/project/config.py and update the API credentials where neccesary. 
 
 ### Part Four - Run setup processes for Flask
 1. `$ python manage.py create_db`
