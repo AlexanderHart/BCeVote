@@ -29,8 +29,8 @@ from flask.ext.login import login_user, logout_user, \
 user_blueprint      = Blueprint('user', __name__,)
 petition_blueprint  = Blueprint('petition', __name__,)
 
-kcl = kmd.KMDClient("92a6ba4b14f7525168df6c51187a74bfd811f33cb483aa5c055d9921d8a90aa9", "http://127.0.0.1:53052")
-acl = algod.AlgodClient("25fbdb645361edd5093b180f882a40504040f64fc47de1eea1e1b19da141c38e", "http://127.0.0.1:53030")
+kcl = kmd.KMDClient("92a6ba4b14f7525168df6c51187a74bfd811f33cb483aa5c055d9921d8a90aa9", "http://127.0.0.1:7833")
+acl = algod.AlgodClient("25fbdb645361edd5093b180f882a40504040f64fc47de1eea1e1b19da141c38e", "http://127.0.0.1:8080")
 
 
 ##################################################
@@ -167,7 +167,7 @@ def GetTxListElements(txList, intendedPK):
     list = {}
 
     if txList is None:
-        return {"No data available":"No data available"}
+        return {}
 
     for i in range(0, len(txList)):
         jsonStr     = base64.b64decode(txList[i]['noteb64'])
@@ -218,7 +218,9 @@ def listPetitions():
                 trashBagPK  = (Petition.query.filter_by(uid=1).one()).masterAccount
                 no_txs      = acl.transactions_by_address(trashBagPK, first=1, last=acl.block_info(acl.status().get("lastRound"))["round"])
                 no_json     = (GetTxListElements(no_txs.get("transactions"),curPetition.publicKey))
-                return render_template('petition/viewDetails.html', txList=yes_json, NotxList=no_json, curPetition=curPetition)
+                yesCount    = len(yes_json)
+                noCount     = len(no_json)
+                return render_template('petition/viewDetails.html', yesCount=yesCount, noCount=noCount, txList=yes_json, NotxList=no_json, curPetition=curPetition)
 
             elif "voteYes" in request.form:
                 petPK                   = str(request.form['voteYes'])
