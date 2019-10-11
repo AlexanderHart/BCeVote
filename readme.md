@@ -28,12 +28,12 @@
 6. `$ pip3 install py-algorand-sdk`
 7. Set environment variables, APP_MAIL_USERNAME and APP_MAIL_PASSWORD to your email and password, respectfully. Also, these values can be hardcoded in /project/config.py, if desired.
 
-### Part Three - Create and run Private Network/Algod Processes & Update Config:
+### Part Three - Create and run Private Network/Algod Processes & Update Files:
 1. Create a private network with `./goal network create -r ~/algodNet -n private -t <path_to_template.json>`
 NOTICE: We supply the template JSON file (from the Algorand developer page) that can be used in the above step. Locate the file at the following path: <YourParentDirectory>/venv/BCeV-master/project/privateNetwork.json
 2. `./goal network start -r ~/algodNet`
 3. `./goal kmd start -d ~/algodNet/Primary`
-4. Using the API keys in files: algod.net algod.token kmd.net kmd.token in ~/algodNet/Primary and ~/algodNet/Primary/kmd, respectfully, then open config.py located at <YourParentDirectory>/venv/BCeV-master/project/config.py and update the API credentials where neccesary. 
+4. Using the API keys in files: algod.net algod.token kmd.net kmd.token in ~/algodNet/Primary and ~/algodNet/Primary/kmd, respectfully, then open manage.py located at <YourParentDirectory>/venv/BCeV-master/manage.py in line 88 and 89 and update the API credentials where neccesary. Additionally, modify files ../project/petition/views.py line 32 and line 33 with new API keys.
 
 ### Part Four - Run setup processes for Flask
 1. `$ python manage.py create_db`
