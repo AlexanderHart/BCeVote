@@ -32,7 +32,7 @@ Proceed to step 3 in part two below.
 4. Activate virtual environment`$ source venv/bin/activate`
 5. `$ pip3 install -r requirements.txt`
 6. `$ pip3 install py-algorand-sdk`
-7. Set environment variables, APP_MAIL_USERNAME and APP_MAIL_PASSWORD to your email and password, respectfully. Also, these values can be hardcoded in /project/config.py, if desired.
+7. Set environment variables, APP_MAIL_USERNAME and APP_MAIL_PASSWORD to your email and password, respectfully. Also, these values can be hardcoded in /project/config.py, if desired in line 24 and 25.
 
 ### Part Three - Create and run Private Network/Algod Processes & Update Files:
 1. Create a private network with `./goal network create -r ~/algodNet -n private -t <path_to_template.json>`
