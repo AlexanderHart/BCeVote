@@ -19,7 +19,13 @@
 ### Part One - Install Algorand Node:
 1. Click on this link and follow instructions for your specific operating system: https://developer.algorand.org/docs/introduction-installing-node
 
-### Part Two - Install BCeV:
+### Part Two - Install Python Virtual Environment and BCeV:
+Some users have had issues with creating python virtual environments, they could perhaps take the following steps before proceeding:
+`$ pip install virtualenv`
+`$ virtualenv venv`
+`$ virtualenv - - system-site-packages`
+Proceed to step 3 in part two below.
+
 1. Create empty parent directory.
 2. Create Python virtual environment `$ python3 -m venv venv`
 3. Clone repo into venv directory.
