@@ -121,31 +121,55 @@ def createPetition():
 # (String) - Current user's email.                  #
 # (Dict)   - Collection of transactions for the     #
 #            specified Algorand account address.    #
+# (String) - Indicate which type of vote(yes or no) #
+#            the function is handling so it's knows #
+#            which algorithm to use.                #
 #                                                   #
 # Description:                                      #
-# Iterate through Dict and parse JSON data to       #
-# check if String matches itself in Dict; return    #
-# True if such; otherwise return False to indicate  #
+# If checking "Yes" votes; Iterate through Dict and #
+# parse JSON data to check if String matches itself #
+# in Dict; return True if such; otherwise return    #
+# False to indicate no match was found and the user #
+# has not voted for a particular petition yet.      #
+#                                                   #
+# If checking "No" votes; Iterate through Dict and  #
+# check the key value if it matches itself, return  #
+# True if such, otherwise return False to indicate  #
 # no match was found and the user has not voted for #
 # a particular petition yet.                        #
 #                                                   #
 #####################################################
-def DoubleVoteChecker(curUser, txArray):
-    txSize = txArray.get("transactions")
+def DoubleVoteChecker(curUser, txArray, yesNo):
+    if yesNo == "Yes":
+        txSize = txArray.get("transactions")
 
-    if txSize is None:
+        if txSize is None:
+            return False
+
+        for i in range(0,len(txSize)):
+            currentTx = txArray.get("transactions")[i]
+            noteb64 = currentTx.get("noteb64")
+            note = base64.b64decode(noteb64)
+            email = json.loads(note)["email"]
+            if email == str(curUser):
+                print(email)
+                return True
+                break
+
         return False
+    elif yesNo == "No":
 
-    for i in range(0,len(txSize)):
-        currentTx = txArray.get("transactions")[i]
-        noteb64 = currentTx.get("noteb64")
-        note = base64.b64decode(noteb64)
-        email = json.loads(note)["email"]
-        if email == str(curUser):
-            return True
-            break
+        if txArray is None:
+            return False
 
-    return False
+        for key in txArray:
+            email = key
+            if email == str(curUser):
+                print(email)
+                return True
+                break
+
+        return False
 
 
 ##################################################
@@ -224,14 +248,18 @@ def listPetitions():
 
             elif "voteYes" in request.form:
                 petPK                   = str(request.form['voteYes'])
-                petitionMasterAccount   = (Petition.query.filter_by(publicKey=petPK).one())
-                txs                     = acl.transactions_by_address(petPK, first=1, last=acl.block_info(acl.status().get("lastRound"))["round"])
-                if DoubleVoteChecker(current_user.email, txs):
+                curPetition             = Petition.query.filter_by(publicKey=petPK).first()
+                yestxs                  = acl.transactions_by_address(petPK, first=1, last=acl.block_info(acl.status().get("lastRound"))["round"])
+                trashBagPK              = (Petition.query.filter_by(uid=1).one()).masterAccount
+                notxs_raw               = acl.transactions_by_address(trashBagPK, first=1, last=acl.block_info(acl.status().get("lastRound"))["round"])
+                notxs_parsed            = (GetTxListElements(notxs_raw.get("transactions"),curPetition.publicKey))
+
+                if DoubleVoteChecker(current_user.email, notxs_parsed, "No") or DoubleVoteChecker(current_user.email, yestxs, "Yes"):
                     flash("You have already signed this petition.")
                 else:
                     masterAccountWallet     = "MasterAccounts"
                     masterAccountPassword   = "root"
-                    masterAccount           = petitionMasterAccount.masterAccount
+                    masterAccount           = (Petition.query.filter_by(publicKey=petPK).one()).masterAccount
                     wallets                 = kcl.list_wallets()
                     masterAccountID         = None
                     for w in wallets:
@@ -268,16 +296,24 @@ def listPetitions():
                     signed_offline  = txn.sign(private_key)
                     transaction_id  = acl.send_transaction(signed_with_kmd)
             elif "voteNo" in request.form:
-                trashBagPK              = (Petition.query.filter_by(uid=1).one()).masterAccount
+                # petPK                   = str(request.form['voteNo'])
+                # petitionMasterAccount   = (Petition.query.filter_by(publicKey=petPK).one())
+                # yestxs                  = acl.transactions_by_address(petPK, first=1, last=acl.block_info(acl.status().get("lastRound"))["round"])
+                # trashBagPK              = (Petition.query.filter_by(uid=1).one()).masterAccount
+                # notxs                   = acl.transactions_by_address(trashBagPK, first=1, last=acl.block_info(acl.status().get("lastRound"))["round"])
                 petPK                   = str(request.form['voteNo'])
-                petitionMasterAccount   = (Petition.query.filter_by(publicKey=petPK).one())
-                txs                     = acl.transactions_by_address(trashBagPK, first=1, last=acl.block_info(acl.status().get("lastRound"))["round"])
-                if DoubleVoteChecker(current_user.email, txs):
+                curPetition             = Petition.query.filter_by(publicKey=petPK).first()
+                yestxs                  = acl.transactions_by_address(petPK, first=1, last=acl.block_info(acl.status().get("lastRound"))["round"])
+                trashBagPK              = (Petition.query.filter_by(uid=1).one()).masterAccount
+                notxs_raw               = acl.transactions_by_address(trashBagPK, first=1, last=acl.block_info(acl.status().get("lastRound"))["round"])
+                notxs_parsed            = (GetTxListElements(notxs_raw.get("transactions"),curPetition.publicKey))
+
+                if DoubleVoteChecker(current_user.email, notxs_parsed, "No") or DoubleVoteChecker(current_user.email, yestxs, "Yes"):
                     flash("You have already signed this petition.")
                 else:
                     masterAccountWallet     = "MasterAccounts"
                     masterAccountPassword   = "root"
-                    masterAccount           = petitionMasterAccount.masterAccount
+                    masterAccount           = (Petition.query.filter_by(publicKey=petPK).one()).masterAccount
                     wallets                 = kcl.list_wallets()
                     masterAccountID         = None
                     for w in wallets:
@@ -312,7 +348,7 @@ def listPetitions():
                     private_key     = kcl.export_key(masterAccountHandle, masterAccountPassword,masterAccount)
                     signed_offline  = txn.sign(private_key)
                     transaction_id  = acl.send_transaction(signed_with_kmd)
-
+                    flash("Success: You have voted!", "success")
     curDate         = datetime.datetime.now().strftime("%Y-%m-%d")
     curPetitions    = Petition.query.filter(Petition.endDate >= curDate)
     pastPetitions   = Petition.query.filter(Petition.endDate < curDate)
