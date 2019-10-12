@@ -41,7 +41,7 @@ NOTICE: We supply the template JSON file (from the Algorand developer page) that
 3. `./goal kmd start -d ~/algodNet/Primary`
 4. Using the API keys in files: algod.net algod.token kmd.net kmd.token in ~/algodNet/Primary and ~/algodNet/Primary/kmd, respectfully, then open manage.py located at <YourParentDirectory>/venv/BCeV-master/manage.py in line 88 and 89 and update the API credentials. Additionally, modify files ../project/petition/views.py line 32 and line 33 with new API keys.
 
-### Part Four - Run setup processes for Flask
+### Part Four - Run setup processes for BCeV
 1. `$ python manage.py create_db`
 2. `$ python manage.py db init`
 3. `$ python manage.py db migrate`
