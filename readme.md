@@ -19,28 +19,22 @@
 ### Part One - Install Algorand Node:
 1. Click on this link and follow instructions for your specific operating system: https://developer.algorand.org/docs/introduction-installing-node
 
-### Part Two - Install Python Virtual Environment and BCeV:
-Some users have had issues with creating python virtual environments, they could perhaps take the following steps before proceeding:
-`$ pip install virtualenv`
-`$ virtualenv venv`
-`$ virtualenv - - system-site-packages`
-Proceed to step 3 in part two below.
-
-1. Create empty parent directory.
-2. Create Python virtual environment `$ python3 -m venv venv`
-3. Clone repo into venv directory.
-4. Activate virtual environment`$ source venv/bin/activate`
-5. `$ cd venv/BCeVote-master`
-6. `$ pip3 install -r requirements.txt`
-7. `$ pip3 install py-algorand-sdk`
-8. Set environment variables, APP_MAIL_USERNAME and APP_MAIL_PASSWORD to your email and password, respectfully. Also, these values can be hardcoded in /project/config.py, if desired in line 24 and 25.
-9. Update data_dir_path in params.py
-
-### Part Three - Create and run Private Network/Algod Processes & Update Files:
+### Part Two - Create and run Private Network/Algod Processes & Update Files:
 1. Create a private network with `./goal network create -r ~/algodNet -n private -t <path_to_template.json>`
 NOTICE: We supply the template JSON file (from the Algorand developer page) that can be used in the above step. Locate the file at the following path: <YourParentDirectory>/venv/BCeV-master/project/privateNetwork.json
 2. `./goal network start -r ~/algodNet`
 3. `./goal kmd start -d ~/algodNet/Primary`
+
+### Part Three - Install Python Virtual Environment and BCeV:
+1. Create empty parent directory.
+2. Create Python virtual environment `$ python3 -m venv venv`
+3. Activate virtual environment`$ source venv/bin/activate`
+4. `git clone https://github.com/AlexanderHart/BCeVote.git`
+5. `$ cd venv/BCeVote`
+6. `$ pip3 install -r requirements.txt`
+7. `$ pip3 install py-algorand-sdk`
+8. Set environment variables, APP_MAIL_USERNAME and APP_MAIL_PASSWORD to your email and password, respectfully. Also, these values can be hardcoded in /project/config.py, if desired in line 24 and 25.
+9. Update data_dir_path in params.py
 
 ### Part Four - Run setup processes for BCeV
 1. `$ python manage.py create_db`
