@@ -7,13 +7,14 @@ home = expanduser("~")
 # change these after starting the node and kmd
 
 kmd_token = ""
-kmd_address = "http://127.0.0.1:"
+kmd_address = ""
 
 algod_token = ""
-algod_address = "http://127.0.0.1:"
+algod_address = ""
 
 # path to the data directory
-data_dir_path = "/home/alex/draft/Primary"
+#data_dir_path = environ.get("ALGORAND_DATA", home + "/node/network/Node")
+data_dir_path = "/Users/alexanderhart/draft3/Primary"
 kmd_folder_name = "kmd-v0.5"  # name of the kmd folder in the data directory
 
 #get tokens and addresses automatically, if data_dir_path is not empty
