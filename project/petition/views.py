@@ -17,6 +17,7 @@ import datetime
 import hashlib
 import json
 import base64
+from project import params
 import time
 
 from flask import render_template, Blueprint, url_for, \
@@ -29,8 +30,8 @@ from flask.ext.login import login_user, logout_user, \
 user_blueprint      = Blueprint('user', __name__,)
 petition_blueprint  = Blueprint('petition', __name__,)
 
-kcl = kmd.KMDClient("92a6ba4b14f7525168df6c51187a74bfd811f33cb483aa5c055d9921d8a90aa9", "http://127.0.0.1:7833")
-acl = algod.AlgodClient("25fbdb645361edd5093b180f882a40504040f64fc47de1eea1e1b19da141c38e", "http://127.0.0.1:8080")
+kcl = kmd.KMDClient(params.kmd_token, params.kmd_address)
+acl = algod.AlgodClient(params.algod_token, params.algod_address)
 
 
 ##################################################
