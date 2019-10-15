@@ -1,3 +1,7 @@
 #!/bin/bash
 
-~/node/goal clerk send -a 10100000 -f 4WM6PFXLKYIJHXZVJZCTZDGZU6JIULVKOZKPTEDPEB6KGFUDECM7OTHAYY -t $1 -d ~/algodNet/Primary -w unencrypted-default-wallet
+GETDEFAULTACCOUNT="$(~/node/goal account list -d ~/algodNet/Primary/ -w unencrypted-default-wallet)"
+
+defaultAccount="${GETDEFAULTACCOUNT:9:58}"
+
+~/node/goal clerk send -a 10100000 -f $defaultAccount -t $1 -d ~/algodNet/Primary -w unencrypted-default-wallet
