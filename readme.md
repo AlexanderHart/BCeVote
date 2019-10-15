@@ -21,8 +21,8 @@
 
 ### Part Two - Install Python Virtual Environment and BCeV:
 1. Create empty parent directory.
-2. Create Python virtual environment within new parent directory `$ python3 -m venv venv`
-3. Activate virtual environment`$ source venv/bin/activate`
+2. Create Python virtual environment within new parent directory `python3 -m venv venv`
+3. Activate virtual environment`source venv/bin/activate` then `cd venv`
 4. `git clone https://github.com/AlexanderHart/BCeVote.git venv`
 5. `cd venv/BCeVote`
 6. `pip3 install -r requirements.txt`
