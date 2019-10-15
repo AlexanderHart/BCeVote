@@ -5,7 +5,7 @@ import os
 import unittest
 import coverage
 import datetime
-
+from project import params
 
 from algosdk import encoding
 from algosdk import transaction
@@ -85,8 +85,8 @@ def create_admin():
 
 @manager.command
 def create_trashbag():
-    kcl = kmd.KMDClient("eea0f318393807f76c471f89d5f28501dfc4468ab606c13703ab457ac92efa6e", "http://127.0.0.1:7833")
-    acl = algod.AlgodClient("38f0005e0ec826c5dff9b03c1f08e0c133a4360bd6b886b9827226a1780bd86e", "http://127.0.0.1:8080")
+    kcl = kmd.KMDClient(params.kmd_token, params.kmd_address)
+    acl = algod.AlgodClient(params.algod_token, params.algod_address)
 
     petitionWallet = "Petitions"
     petitionWalletPassword = "root"
