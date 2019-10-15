@@ -39,7 +39,6 @@ Proceed to step 3 in part two below.
 NOTICE: We supply the template JSON file (from the Algorand developer page) that can be used in the above step. Locate the file at the following path: <YourParentDirectory>/venv/BCeV-master/project/privateNetwork.json
 2. `./goal network start -r ~/algodNet`
 3. `./goal kmd start -d ~/algodNet/Primary`
-4. Using the API keys in files: algod.net algod.token kmd.net kmd.token in ~/algodNet/Primary and ~/algodNet/Primary/kmd, respectfully, then open manage.py located at <YourParentDirectory>/venv/BCeV-master/manage.py in line 88 and 89 and update the API credentials. Additionally, modify files ../project/petition/views.py line 32 and line 33 with new API keys.
 
 ### Part Four - Run setup processes for BCeV
 1. `$ python manage.py create_db`
