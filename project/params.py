@@ -14,7 +14,7 @@ algod_address = ""
 
 # path to the data directory
 #data_dir_path = environ.get("ALGORAND_DATA", home + "/node/network/Node")
-data_dir_path = "/Users/alexanderhart/draft3/Primary"
+data_dir_path = "/Users/alexanderhart/algodNet/Primary"
 kmd_folder_name = "kmd-v0.5"  # name of the kmd folder in the data directory
 
 #get tokens and addresses automatically, if data_dir_path is not empty
