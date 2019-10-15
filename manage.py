@@ -5,6 +5,7 @@ import os
 import unittest
 import coverage
 import datetime
+import hashlib
 from project import params
 
 from algosdk import encoding
@@ -75,7 +76,7 @@ def drop_db():
 def create_admin():
     """Creates the admin user."""
     db.session.add(User(
-        email="ad@min.com",
+        email=str(hashlib.sha256("ad@min.com".encode()).hexdigest()),
         password="admin",
         admin=True,
         confirmed=True,
