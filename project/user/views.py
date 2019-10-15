@@ -11,6 +11,7 @@ from algosdk import algod
 from algosdk import account
 from algosdk import mnemonic
 import json
+import hashlib
 
 
 from project.email import send_email
@@ -43,9 +44,11 @@ user_blueprint = Blueprint('user', __name__,)
 @user_blueprint.route('/register', methods=['GET', 'POST'])
 def register():
     form = RegisterForm(request.form)
+
     if form.validate_on_submit():
+        encryptedEmail = str(hashlib.sha256(str(form.email.data).encode()).hexdigest())
         user = User(
-            email=form.email.data,
+            email=encryptedEmail,
             password=form.password.data,
             confirmed=False
         )
@@ -56,7 +59,7 @@ def register():
         confirm_url = url_for('user.confirm_email', token=token, _external=True)
         html = render_template('user/activate.html', confirm_url=confirm_url)
         subject = "Please confirm your email"
-        send_email(user.email, subject, html)
+        send_email(form.email.data, subject, html)
 
         login_user(user)
 
@@ -70,7 +73,8 @@ def register():
 def login():
     form = LoginForm(request.form)
     if form.validate_on_submit():
-        user = User.query.filter_by(email=form.email.data).first()
+        encryptedEmail = str(hashlib.sha256(str(form.email.data).encode()).hexdigest())
+        user = User.query.filter_by(email=encryptedEmail).first()
         if user and bcrypt.check_password_hash(
                 user.password, request.form['password']):
             login_user(user)
