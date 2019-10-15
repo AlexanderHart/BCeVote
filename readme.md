@@ -23,8 +23,8 @@
 1. Create empty parent directory.
 2. Create Python virtual environment within new parent directory `python3 -m venv venv`
 3. Activate virtual environment`source venv/bin/activate` then `cd venv`
-4. `git clone https://github.com/AlexanderHart/BCeVote.git venv`
-5. `cd venv/BCeVote`
+4. `git clone https://github.com/AlexanderHart/BCeVote.git`
+5. `cd BCeVote`
 6. `pip3 install -r requirements.txt`
 7. `pip3 install py-algorand-sdk`
 8. Set environment variables, APP_MAIL_USERNAME and APP_MAIL_PASSWORD to your email and password, respectfully. Also, these values can be hardcoded in /project/config.py, if desired in line 24 and 25.
