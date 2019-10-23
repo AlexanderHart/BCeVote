@@ -28,6 +28,7 @@
 6. `pip3 install -r requirements.txt`
 7. `pip3 install py-algorand-sdk`
 8. Set environment variables, APP_MAIL_USERNAME and APP_MAIL_PASSWORD to your email and password, respectfully. Also, these values can be hardcoded in /project/config.py, if desired in line 24 and 25.
+9. Create bash executable Within project directory: `chmod u+x autoDispense.sh`
 
 ### Part Three - Create and run Private Network/Algod Processes & Update Files:
 1. Create a private network with `./goal network create -r ~/algodNet -n private -t <path_to_template.json>`
@@ -37,12 +38,12 @@ NOTICE: We supply the template JSON file (from the Algorand developer page) that
 4. Update data_dir_path in line 17 at BCeVote/project/params.py
 
 ### Part Four - Run setup processes for BCeV
-1. `$ python3 manage.py create_db`
-2. `$ python3 manage.py db init`
-3. `$ python3 manage.py db migrate`
-4. `$ python3 manage.py create_admin`
-5. `$ python3 manage.py create_trashbag`
-6. `$ python3 manage.py runserver`
+1. `python3 manage.py create_db`
+2. `python3 manage.py db init`
+3. `python3 manage.py db migrate`
+4. `python3 manage.py create_admin`
+5. `python3 manage.py create_trashbag`
+6. `python3 manage.py runserver`
 7. Navigate to 127.0.0.1:5000 to demo BCeV.
 
 # Credit & Acknowledgement:
