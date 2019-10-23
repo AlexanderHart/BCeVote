@@ -106,7 +106,7 @@ def createPetition():
         # Run bash script that automatically transfers microAlgos
         # from unencrypted-default-wallet to the desired Peition's
         # Master Account.
-        subprocess.call(["project/autoDispense.sh",str(address_2)])
+        subprocess.call(["project/petition/autoDispense.sh",str(address_2)])
 
         flash('Petition has been created!.', 'success')
 
@@ -238,6 +238,8 @@ def listPetitions():
         if request.method == 'POST':
             if "details" in request.form:
                 curPetition = Petition.query.filter_by(uid=str(request.form["details"])).first()
+                startDate   = str(curPetition.startDate.strftime("%b %d %Y"))
+                endDate     = str(curPetition.endDate.strftime("%b %d %Y"))
                 yes_votes   = acl.transactions_by_address(curPetition.publicKey, first=1, last=acl.block_info(acl.status().get("lastRound"))["round"])
                 yes_json    = (GetTxListElements(yes_votes.get("transactions"),curPetition.publicKey))
                 trashBagPK  = (Petition.query.filter_by(uid=1).one()).masterAccount
@@ -245,7 +247,7 @@ def listPetitions():
                 no_json     = (GetTxListElements(no_txs.get("transactions"),curPetition.publicKey))
                 yesCount    = len(yes_json)
                 noCount     = len(no_json)
-                return render_template('petition/viewDetails.html', yesCount=yesCount, noCount=noCount, txList=yes_json, NotxList=no_json, curPetition=curPetition)
+                return render_template('petition/viewDetails.html', startDate=startDate, endDate=endDate, yesCount=yesCount, noCount=noCount, txList=yes_json, NotxList=no_json, curPetition=curPetition)
 
             elif "voteYes" in request.form:
                 petPK                   = str(request.form['voteYes'])
