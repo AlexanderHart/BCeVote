@@ -106,7 +106,7 @@ def createPetition():
         # Run bash script that automatically transfers microAlgos
         # from unencrypted-default-wallet to the desired Peition's
         # Master Account.
-        subprocess.call(["project/petition/autoDispense.sh",str(address_2)])
+        subprocess.call(["project/autoDispense.sh",str(address_2)])
 
         flash('Petition has been created!.', 'success')
 
