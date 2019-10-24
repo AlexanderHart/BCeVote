@@ -46,25 +46,28 @@ def register():
     form = RegisterForm(request.form)
 
     if form.validate_on_submit():
-        encryptedEmail = str(hashlib.sha256(str(form.email.data).encode()).hexdigest())
-        user = User(
-            email=encryptedEmail,
-            password=form.password.data,
-            confirmed=False
-        )
-        db.session.add(user)
-        db.session.commit()
+        if "@bcmail.cuny.edu" in str(form.email.data) or "@bcacad.local " in str(form.email.data):
+            encryptedEmail = str(hashlib.sha256(str(form.email.data).encode()).hexdigest())
+            user = User(
+                email=encryptedEmail,
+                password=form.password.data,
+                confirmed=False
+            )
+            db.session.add(user)
+            db.session.commit()
 
-        token = generate_confirmation_token(user.email)
-        confirm_url = url_for('user.confirm_email', token=token, _external=True)
-        html = render_template('user/activate.html', confirm_url=confirm_url)
-        subject = "Please confirm your email"
-        send_email(form.email.data, subject, html)
+            token = generate_confirmation_token(user.email)
+            confirm_url = url_for('user.confirm_email', token=token, _external=True)
+            html = render_template('user/activate.html', confirm_url=confirm_url)
+            subject = "Please confirm your email"
+            send_email(form.email.data, subject, html)
 
-        login_user(user)
+            login_user(user)
 
-        flash('A confirmation email has been sent via email.', 'success')
-        return redirect(url_for("user.unconfirmed"))
+            flash('A confirmation email has been sent via email.', 'success')
+            return redirect(url_for("user.unconfirmed"))
+        else:
+            flash('Error: Must have a Brooklyn College email address.', 'warning')
 
     return render_template('user/register.html', form=form)
 
