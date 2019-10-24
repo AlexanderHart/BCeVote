@@ -298,6 +298,7 @@ def listPetitions():
                     private_key     = kcl.export_key(masterAccountHandle, masterAccountPassword,masterAccount)
                     signed_offline  = txn.sign(private_key)
                     transaction_id  = acl.send_transaction(signed_with_kmd)
+                    flash("Success: You have voted!", "success")
             elif "voteNo" in request.form:
                 # petPK                   = str(request.form['voteNo'])
                 # petitionMasterAccount   = (Petition.query.filter_by(publicKey=petPK).one())
