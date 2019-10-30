@@ -61,10 +61,12 @@ class Petition(db.Model):
         self.startDate = startDate
         self.endDate = endDate
 
+
 class Feedback(db.Model):
 
     __tablename__ = "feedback"
 
+    fid = db.Column(db.Integer, primary_key=True)
     q1 = db.Column(db.String, nullable=True)
     q2 = db.Column(db.String, nullable=True)
     q3 = db.Column(db.String, nullable=True)
