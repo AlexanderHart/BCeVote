@@ -42,9 +42,11 @@ db = SQLAlchemy(app)
 from project.main.views import main_blueprint
 from project.user.views import user_blueprint
 from project.petition.views import petition_blueprint
+from project.feedback.views import feedback_blueprint
 app.register_blueprint(main_blueprint)
 app.register_blueprint(user_blueprint)
 app.register_blueprint(petition_blueprint)
+app.register_blueprint(feedback_blueprint)
 
 
 ####################
