@@ -3,7 +3,7 @@
 from .forms import FeedbackForm
 from project.token import generate_confirmation_token, confirm_token
 from project.decorators import check_confirmed
-from project.models import User, Petition
+from project.models import User, Petition, Feedback
 from project.email import send_email
 
 
@@ -34,15 +34,14 @@ feedback_blueprint  = Blueprint('feedback', __name__,)
 def giveFeedback():
     form = FeedbackForm(request.form)
     if form.validate_on_submit():
-        petition = Petition(
-            name="form.name.data,",
-	        publicKey="address_1",
-            masterAccount = "",
-            yesCount=0,
-            startDate="form.startDate.data",
-            endDate="orm.endDate.data"
+        feedback = Feedback(
+            q1=form.q1.data,
+            q2=form.q2.data,
+            q3=form.q3.data,
+            q4=form.q4.data,
+            q5=form.q5.data
         )
-        db.session.add(petition)
+        db.session.add(feedback)
         db.session.commit()
         flash('Feedback has been created!.', 'success')
 
