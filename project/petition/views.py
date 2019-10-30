@@ -1,6 +1,6 @@
 # project/petition/views.py
 
-from .forms import LoginForm, RegisterForm, ChangePasswordForm, CreatePetitionForm, ListPetitionForm
+from .forms import LoginForm, RegisterForm, FeedbackForm, ChangePasswordForm, CreatePetitionForm, ListPetitionForm
 from project.token import generate_confirmation_token, confirm_token
 from project.decorators import check_confirmed
 from project.models import User, Petition
@@ -29,6 +29,7 @@ from flask.ext.login import login_user, logout_user, \
 
 user_blueprint      = Blueprint('user', __name__,)
 petition_blueprint  = Blueprint('petition', __name__,)
+feedback_blueprint  = Blueprint('feedback', __name__,)
 
 kcl = kmd.KMDClient(params.kmd_token, params.kmd_address)
 acl = algod.AlgodClient(params.algod_token, params.algod_address)
@@ -55,7 +56,6 @@ acl = algod.AlgodClient(params.algod_token, params.algod_address)
 def createPetition():
     form = CreatePetitionForm(request.form)
     if form.validate_on_submit():
-
         petitionWallet              = "Petitions"
         petitionWalletPassword      = "root"
         masterAccountWallet         = "MasterAccounts"
@@ -106,7 +106,7 @@ def createPetition():
         # Run bash script that automatically transfers microAlgos
         # from unencrypted-default-wallet to the desired Peition's
         # Master Account.
-        subprocess.call(["project/autoDispense.sh",str(address_2)])
+        subprocess.call(["project/petition/autoDispense.sh",str(address_2)])
 
         flash('Petition has been created!.', 'success')
 
@@ -258,7 +258,7 @@ def listPetitions():
                 notxs_parsed            = (GetTxListElements(notxs_raw.get("transactions"),curPetition.publicKey))
 
                 if DoubleVoteChecker(current_user.email, notxs_parsed, "No") or DoubleVoteChecker(current_user.email, yestxs, "Yes"):
-                    flash("You have already signed this petition.")
+                    flash('You have already signed this petition.', 'warning')
                 else:
                     masterAccountWallet     = "MasterAccounts"
                     masterAccountPassword   = "root"
@@ -298,7 +298,7 @@ def listPetitions():
                     private_key     = kcl.export_key(masterAccountHandle, masterAccountPassword,masterAccount)
                     signed_offline  = txn.sign(private_key)
                     transaction_id  = acl.send_transaction(signed_with_kmd)
-                    flash("Success: You have voted!", "success")
+                    return redirect(url_for("feedback.giveFeedback"))
             elif "voteNo" in request.form:
                 # petPK                   = str(request.form['voteNo'])
                 # petitionMasterAccount   = (Petition.query.filter_by(publicKey=petPK).one())
@@ -313,7 +313,7 @@ def listPetitions():
                 notxs_parsed            = (GetTxListElements(notxs_raw.get("transactions"),curPetition.publicKey))
 
                 if DoubleVoteChecker(current_user.email, notxs_parsed, "No") or DoubleVoteChecker(current_user.email, yestxs, "Yes"):
-                    flash("You have already signed this petition.")
+                    flash('You have already signed this petition.', 'warning')
                 else:
                     masterAccountWallet     = "MasterAccounts"
                     masterAccountPassword   = "root"
@@ -352,7 +352,7 @@ def listPetitions():
                     private_key     = kcl.export_key(masterAccountHandle, masterAccountPassword,masterAccount)
                     signed_offline  = txn.sign(private_key)
                     transaction_id  = acl.send_transaction(signed_with_kmd)
-                    flash("Success: You have voted!", "success")
+                    return redirect(url_for("feedback.feedback"))
     curDate         = datetime.datetime.now().strftime("%Y-%m-%d")
     curPetitions    = Petition.query.filter(Petition.endDate >= curDate)
     pastPetitions   = Petition.query.filter(Petition.endDate < curDate)
