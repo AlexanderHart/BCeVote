@@ -60,3 +60,20 @@ class Petition(db.Model):
         self.yesCount = yesCount
         self.startDate = startDate
         self.endDate = endDate
+
+class Feedback(db.Model):
+
+    __tablename__ = "feedback"
+
+    q1 = db.Column(db.String, nullable=True)
+    q2 = db.Column(db.String, nullable=True)
+    q3 = db.Column(db.String, nullable=True)
+    q4 = db.Column(db.String, nullable=True)
+    q5 = db.Column(db.String, nullable=True)
+
+    def __init__(self, q1, q2, q3, q4, q5):
+        self.q1 = q1
+        self.q2 = q2
+        self.q3 = q3
+        self.q4 = q4
+        self.q5 = q5
