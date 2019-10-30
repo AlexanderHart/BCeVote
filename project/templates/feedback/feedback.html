@@ -1,0 +1,22 @@
+{% extends "_base.html" %}
+
+{% block content %}
+
+<p style="font-size:26px; font-weight:700;">Thank you for voting!</p>
+<p style="font-size:20px;">Please take the time to fill out our optional feedback survey to help us learn how to improve BCeV.</p>
+<br>
+
+<form class="form-reset" role="form" method="post" action="">
+  {{ form.csrf_token }}
+  <p>
+    {{ form.q1(placeholder="Q1") }}<br><br>
+      {{ form.q2(placeholder="Q2") }}<br><br>
+        {{ form.q3(placeholder="Q3") }}<br><br>
+          {{ form.q4(placeholder="Q4") }}<br><br>
+  </p>
+
+  <button class="btn btn-success" type="submit">Submit</button>
+</form>
+
+
+{% endblock %}
