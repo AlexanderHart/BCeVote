@@ -5,6 +5,7 @@ from project.token import generate_confirmation_token, confirm_token
 from project.decorators import check_confirmed
 from project.models import User, Petition, Feedback
 from project.email import send_email
+from project import db
 
 
 from flask import render_template, Blueprint, url_for, \
