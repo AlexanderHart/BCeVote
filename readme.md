@@ -32,7 +32,7 @@
 
 ### Part Three - Create and run Private Network/Algod Processes & Update Files:
 1. Create a private network with `./goal network create -r ~/algodNet -n private -t <path_to_template.json>`
-NOTICE: We supply the template JSON file (from the Algorand developer page) that can be used in the above step. Locate the file at the following path: <YourParentDirectory>/venv/BCeV-master/project/privateNetwork.json
+NOTICE: We supply the template JSON file (from the Algorand developer page) that can be used in the above step. Locate the file at the following path: <YourParentDirectory>/venv/BCeV/project/privateNetwork.json
 2. `./goal network start -r ~/algodNet`
 3. `./goal kmd start -d ~/algodNet/Primary`
 4. Update data_dir_path in line 17 at BCeVote/project/params.py
