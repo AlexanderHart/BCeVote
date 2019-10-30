@@ -1,6 +1,6 @@
 # project/petition/views.py
 
-from .forms import LoginForm, RegisterForm, FeedbackForm, ChangePasswordForm, CreatePetitionForm, ListPetitionForm
+from .forms import LoginForm, RegisterForm, ChangePasswordForm, CreatePetitionForm, ListPetitionForm
 from project.token import generate_confirmation_token, confirm_token
 from project.decorators import check_confirmed
 from project.models import User, Petition
