@@ -3,16 +3,22 @@
 {% block content %}
 
 <p style="font-size:26px; font-weight:700;">Thank you for voting!</p>
-<p style="font-size:20px;">Please take the time to fill out our optional feedback survey to help us learn how to improve BCeV.</p>
+<p style="font-size:20px;">Please take a moment to fill out our optional feedback survey to help us learn how to improve BCeV.</p>
 <br>
 
 <form class="form-reset" role="form" method="post" action="">
   {{ form.csrf_token }}
   <p>
-    {{ form.q1(placeholder="Q1") }}<br><br>
-      {{ form.q2(placeholder="Q2") }}<br><br>
-        {{ form.q3(placeholder="Q3") }}<br><br>
-          {{ form.q4(placeholder="Q4") }}<br><br>
+    <span><p>Do you know what blockchain technology is?</p></span>
+    {{ form.q1(placeholder="Enter reponse here.") }}<br><br>
+      <span><p>Was BCeV easy to use?</p></span>
+      {{ form.q2(placeholder="Enter reponse here.") }}<br><br>
+        <span><p>Do you value privacy/anonymity when voting?</p></span>
+        {{ form.q3(placeholder="Enter reponse here.") }}<br><br>
+          <span><p>Do you prefer digital voting in comparison to pen and paper?</p></span>
+          {{ form.q4(placeholder="Enter reponse here.") }}<br><br>
+            <span><p>Do you think the future of voting should be similar to BCeV?</p></span>
+            {{ form.q5(placeholder="Enter reponse here.") }}<br><br>
   </p>
 
   <button class="btn btn-success" type="submit">Submit</button>
