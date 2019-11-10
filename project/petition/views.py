@@ -32,7 +32,18 @@ petition_blueprint  = Blueprint('petition', __name__,)
 feedback_blueprint  = Blueprint('feedback', __name__,)
 
 kcl = kmd.KMDClient(params.kmd_token, params.kmd_address)
-acl = algod.AlgodClient(params.algod_token, params.algod_address)
+
+algod_address = "https://testnet-algorand.api.purestake.io/ps1"
+algod_token = params.algod.token
+headers = {
+   "X-API-Key": "",
+}
+
+
+algod_client = algod.AlgodClient(algod_token, algod_address, headers)
+
+
+
 
 
 ##################################################
@@ -92,6 +103,10 @@ def createPetition():
         kcl.import_key(handle, private_key_1)
         kcl.import_key(handle2, private_key_2)
 
+# get the mnemonic for address_1
+        mn = mnemonic.from_private_key(private_key_2)
+        print("Mnemonic for the first account: " + mn + "\n")
+
         petition = Petition(
             name=form.name.data,
 	        publicKey=address_1,
@@ -106,7 +121,7 @@ def createPetition():
         # Run bash script that automatically transfers microAlgos
         # from unencrypted-default-wallet to the desired Peition's
         # Master Account.
-        subprocess.call(["project/autoDispense.sh",str(address_2)])
+       # subprocess.call(["project/autoDispense.sh",str(address_2)])
 
         flash('Petition has been created!.', 'success')
 
@@ -240,10 +255,10 @@ def listPetitions():
                 curPetition = Petition.query.filter_by(uid=str(request.form["details"])).first()
                 startDate   = str(curPetition.startDate.strftime("%b %d %Y"))
                 endDate     = str(curPetition.endDate.strftime("%b %d %Y"))
-                yes_votes   = acl.transactions_by_address(curPetition.publicKey, first=1, last=acl.block_info(acl.status().get("lastRound"))["round"])
+                yes_votes   = algod_client.transactions_by_address(curPetition.publicKey, first=2900000, last=algod_client.block_info(algod_client.status().get("lastRound"))["round"])
                 yes_json    = (GetTxListElements(yes_votes.get("transactions"),curPetition.publicKey))
                 trashBagPK  = (Petition.query.filter_by(uid=1).one()).masterAccount
-                no_txs      = acl.transactions_by_address(trashBagPK, first=1, last=acl.block_info(acl.status().get("lastRound"))["round"])
+                no_txs      = algod_client.transactions_by_address(trashBagPK, first=2900000, last=algod_client.block_info(algod_client.status().get("lastRound"))["round"])
                 no_json     = (GetTxListElements(no_txs.get("transactions"),curPetition.publicKey))
                 yesCount    = len(yes_json)
                 noCount     = len(no_json)
@@ -252,9 +267,9 @@ def listPetitions():
             elif "voteYes" in request.form:
                 petPK                   = str(request.form['voteYes'])
                 curPetition             = Petition.query.filter_by(publicKey=petPK).first()
-                yestxs                  = acl.transactions_by_address(petPK, first=1, last=acl.block_info(acl.status().get("lastRound"))["round"])
+                yestxs                  = algod_client.transactions_by_address(petPK, first=2900000, last=algod_client.block_info(algod_client.status().get("lastRound"))["round"])
                 trashBagPK              = (Petition.query.filter_by(uid=1).one()).masterAccount
-                notxs_raw               = acl.transactions_by_address(trashBagPK, first=1, last=acl.block_info(acl.status().get("lastRound"))["round"])
+                notxs_raw               = algod_client.transactions_by_address(trashBagPK, first=2900000, last=algod_client.block_info(algod_client.status().get("lastRound"))["round"])
                 notxs_parsed            = (GetTxListElements(notxs_raw.get("transactions"),curPetition.publicKey))
 
                 if DoubleVoteChecker(current_user.email, notxs_parsed, "No") or DoubleVoteChecker(current_user.email, yestxs, "Yes"):
@@ -282,7 +297,7 @@ def listPetitions():
                         petitionWalletID = kcl.create_wallet(petitionWallet, petitionWalletPassword)["id"]
 
                     handle          = kcl.init_wallet_handle(petitionWalletID, petitionWalletPassword)
-                    params          = acl.suggested_params()
+                    params          = algod_client.suggested_params()
                     gen             = params["genesisID"]
                     gh              = params["genesishashb64"]
                     last_round      = params["lastRound"]
@@ -295,9 +310,9 @@ def listPetitions():
                     amount          = 100000
                     txn             = transaction.PaymentTxn(masterAccount, fee, last_round, last_round+100, gh, petPK, amount, gen=gen, note=note)
                     signed_with_kmd = kcl.sign_transaction(masterAccountHandle,masterAccountPassword, txn)
-                    private_key     = kcl.export_key(masterAccountHandle, masterAccountPassword,masterAccount)
-                    signed_offline  = txn.sign(private_key)
-                    transaction_id  = acl.send_transaction(signed_with_kmd)
+                   # private_key     = kcl.export_key(masterAccountHandle, masterAccountPassword,masterAccount)
+                  #  signed_offline  = txn.sign(private_key)
+                    transaction_id  = algod_client.send_transaction(signed_with_kmd, headers={'content-type': 'application/x-binary'})
                     return redirect(url_for("feedback.giveFeedback"))
             elif "voteNo" in request.form:
                 # petPK                   = str(request.form['voteNo'])
@@ -307,9 +322,9 @@ def listPetitions():
                 # notxs                   = acl.transactions_by_address(trashBagPK, first=1, last=acl.block_info(acl.status().get("lastRound"))["round"])
                 petPK                   = str(request.form['voteNo'])
                 curPetition             = Petition.query.filter_by(publicKey=petPK).first()
-                yestxs                  = acl.transactions_by_address(petPK, first=1, last=acl.block_info(acl.status().get("lastRound"))["round"])
+                yestxs                  = algod_client.transactions_by_address(petPK, first=1, last=acl.block_info(acl.status().get("lastRound"))["round"])
                 trashBagPK              = (Petition.query.filter_by(uid=1).one()).masterAccount
-                notxs_raw               = acl.transactions_by_address(trashBagPK, first=1, last=acl.block_info(acl.status().get("lastRound"))["round"])
+                notxs_raw               = algod_client.transactions_by_address(trashBagPK, first=1, last=acl.block_info(algod_client.status().get("lastRound"))["round"])
                 notxs_parsed            = (GetTxListElements(notxs_raw.get("transactions"),curPetition.publicKey))
 
                 if DoubleVoteChecker(current_user.email, notxs_parsed, "No") or DoubleVoteChecker(current_user.email, yestxs, "Yes"):
@@ -336,7 +351,7 @@ def listPetitions():
                         petitionWalletID = kcl.create_wallet(petitionWallet, petitionWalletPassword)["id"]
 
                     handle          = kcl.init_wallet_handle(petitionWalletID, petitionWalletPassword)
-                    params          = acl.suggested_params()
+                    params          = algod_client.suggested_params()
                     gen             = params["genesisID"]
                     gh              = params["genesishashb64"]
                     last_round      = params["lastRound"]
@@ -351,7 +366,7 @@ def listPetitions():
                     signed_with_kmd = kcl.sign_transaction(masterAccountHandle,masterAccountPassword, txn)
                     private_key     = kcl.export_key(masterAccountHandle, masterAccountPassword,masterAccount)
                     signed_offline  = txn.sign(private_key)
-                    transaction_id  = acl.send_transaction(signed_with_kmd)
+                    transaction_id  = algod_client.send_transaction(signed_with_kmd)
                     return redirect(url_for("feedback.feedback"))
     curDate         = datetime.datetime.now().strftime("%Y-%m-%d")
     curPetitions    = Petition.query.filter(Petition.endDate >= curDate)
