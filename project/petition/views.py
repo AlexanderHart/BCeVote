@@ -34,7 +34,7 @@ feedback_blueprint  = Blueprint('feedback', __name__,)
 kcl = kmd.KMDClient(params.kmd_token, params.kmd_address)
 
 algod_address = "https://testnet-algorand.api.purestake.io/ps1"
-algod_token = params.algod.token
+algod_token = params.algodtoken
 headers = {
    "X-API-Key": "",
 }
