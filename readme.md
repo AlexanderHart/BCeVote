@@ -33,6 +33,7 @@
 ### Part Three - Start Algodorand Processes & Update Files:
 1. `sudo ./goal node start -d data`
 2. `sudo ./goal kmd start -d data`
+*2.1* IMPORTANT TO NOTE: Make sure to have at least 1 wallet generated locally to avoid KMD errors. 
 3. Update data_dir_path in line 17 at BCeVote/project/params.py to your absoulute path name for your Algorand node location.
 4. Update /project/petitions/views.py line 39 with the API for PureStake Algorand node.
 
