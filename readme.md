@@ -15,7 +15,7 @@
 
 -Written in Python3.6.8.
 
-### Local Setup/Installation Process:
+### Local Setup/Installation Process [for OS X]:
 ### Part One - Install Algorand Node:
 1. Click on this link and follow instructions for your specific operating system: https://developer.algorand.org/docs/introduction-installing-node
 
@@ -30,14 +30,16 @@
 8. Set environment variables, APP_MAIL_USERNAME and APP_MAIL_PASSWORD to your email and password, respectfully. Also, these values can be hardcoded in /project/config.py, if desired in line 24 and 25.
 9. Create bash executable Within project directory: `chmod u+x autoDispense.sh`
 
-### Part Three - Create and run Private Network/Algod Processes & Update Files:
-1. Create a private network with `./goal network create -r ~/algodNet -n private -t <path_to_template.json>`
-NOTICE: We supply the template JSON file (from the Algorand developer page) that can be used in the above step. Locate the file at the following path: <YourParentDirectory>/venv/BCeVote/project/privateNetwork.json
-2. `./goal network start -r ~/algodNet`
-3. `./goal kmd start -d ~/algodNet/Primary`
-4. Update data_dir_path in line 17 at BCeVote/project/params.py
+### Part Three - Start Algodorand Processes & Update Files:
+1. `sudo ./goal node start -d data`
+2. `sudo ./goal kmd start -d data`
+3. Update data_dir_path in line 17 at BCeVote/project/params.py to your absoulute path name for your Algorand node location.
+4. Update /project/petitions/views.py line 39 with the API for PureStake Algorand node.
 
-### Part Four - Run setup processes for BCeV
+### Part Four - Install Python Certificates for SSL security
+1. `sudo open /Applications/Python\ 3.6/Install\ Certificates.command`
+
+### Part Five - Run setup processes for BCeV
 1. `python3 manage.py create_db`
 2. `python3 manage.py db init`
 3. `python3 manage.py db migrate`
@@ -45,6 +47,9 @@ NOTICE: We supply the template JSON file (from the Algorand developer page) that
 5. `python3 manage.py create_trashbag`
 6. `python3 manage.py runserver`
 7. Navigate to 127.0.0.1:5000 to demo BCeV.
+
+### Part Six - Depositing MicroAlgos into Petition Wallet
+After a petition is submitted via the form, the admin must manually copy the data record for the appropiate 'master account' attribute from the Petitions SQL table. Following that, the admin directs himself to https://bank.testnet.algorand.network and paste the data into the textfield deposit MicroAlgos into the desired petition.
 
 # Credit & Acknowledgement:
 Credit and acknowledgement goes to GitHub user mjhea0, for his repo https://github.com/mjhea0/flask-basic-registration.git for which we used it for our user registration. 
